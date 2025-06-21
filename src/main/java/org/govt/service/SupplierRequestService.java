@@ -13,25 +13,27 @@ import org.springframework.stereotype.Service;
 @Service
 public class SupplierRequestService {
     @Autowired private SupplierRequestRepository requestRepo;
-    @Autowired private SupplierResponseRepository responseRepo;
 
     public SupplierRequest createRequest(SupplierRequest req) {
-        req.setStatus("REQUESTED");
-        req.setCreatedAt(LocalDate.now());
+        req.setStatus("PENDING");
+        req.setRequestedAt(LocalDate.now());
         return requestRepo.save(req);
     }
 
-    public List<SupplierRequest> getRequestsBySupplier(String supplierId) {
+    public SupplierRequest updateStatus(String id, String status) {
+        SupplierRequest req = requestRepo.findById(id).orElseThrow();
+        req.setStatus(status);
+        if ("DELIVERED".equals(status)) {
+            req.setFulfilledAt(LocalDate.now());
+        }
+        return requestRepo.save(req);
+    }
+
+    public List<SupplierRequest> getSupplierRequests(String supplierId) {
         return requestRepo.findBySupplierId(supplierId);
     }
 
-    public SupplierResponse respond(String requestId, SupplierResponse response) {
-        response.setSupplierRequestId(requestId);
-        response.setResponseDate(LocalDate.now());
-        SupplierRequest req = requestRepo.findById(requestId).orElseThrow();
-        req.setStatus("SENT");
-        requestRepo.save(req);
-        return responseRepo.save(response);
+    public List<SupplierRequest> getContractorRequests(String contractorId) {
+        return requestRepo.findByContractorId(contractorId);
     }
 }
-

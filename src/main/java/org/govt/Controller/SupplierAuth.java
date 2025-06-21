@@ -12,26 +12,21 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 public class SupplierAuth {
-    private UserSupplierService user;
 
     @Autowired
-    private JwtUtil jwt=new JwtUtil();
+    private UserSupplierService userSupplierService;
 
-    public SupplierAuth(UserSupplierService user){
-        this.user=user;
-    }
+    @Autowired
+    private JwtUtil jwt;
 
     @PostMapping("/register/supplier")
-    public Register register(@RequestBody User_Supplier user1) {
-        return user.registerSupplier(
-                user1.getName(), user1.getUsername(), user1.getPassword(), user1.getDOB(),
-                user1.getPhone(), user1.getEmail(), user1.getGst_number(), user1.getAddress(),user1.getPincode()
-        );
+    public Register register(@RequestBody User_Supplier userSupplier) {
+        return userSupplierService.registerSupplier(userSupplier);
     }
 
     @PostMapping("/login/supplier")
-    public Login login(@RequestBody User_Supplier user1){
-        if(user.authenticateSupplier(user1.getUsername(),user1.getPassword())){
+    public Login login(@RequestBody User_Supplier userSupplier){
+        if(userSupplierService.authenticateSupplier(userSupplier.getUsername(), userSupplier.getPassword())){
             String token = jwt.generateToken("himanshu3");
             return new Login("LoggedIn Successfully!!!",token);
         }

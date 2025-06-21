@@ -11,30 +11,26 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserContractorService {
-    private final UserContractorRepository user;
-    private final PasswordEncoder password;
 
-    @Autowired
-    JwtUtil jwt= new JwtUtil();
+    @Autowired 
+    private  UserContractorRepository userRepository;
+    private final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+    @Autowired private  JwtUtil jwt;
 
-    public UserContractorService(UserContractorRepository user){
-        this.user=user;
-        this.password=new BCryptPasswordEncoder();
-    }
+  
 
-    public Register registerContractor(String name, String username, String password1, String DOB, long phone, String email, String gst_number, String address,String pincode){
-        if(user.findByUsername(username)!=null){
-            return new Register("User already Exist!!","");
+    public Register registerContractor(User_contractor userContractor) {
+        if (userRepository.findByUsername(userContractor.getUsername()) != null) {
+            return new Register("User  already exists!!", "");
         }
-        User_contractor Contractor = new User_contractor(name,username,password1,DOB,phone,email,gst_number,address,pincode);
-        String hash=password.encode(password1);
-        Contractor.setPassword(hash);
-        user.save(Contractor);
-        return new Register("Registered Successfully!!!",jwt.generateToken(username));
+
+        userContractor.setPassword(passwordEncoder.encode(userContractor.getPassword()));
+        userRepository.save(userContractor);
+        return new Register("Registered successfully!!!", jwt.generateToken(userContractor.getUsername()));
     }
 
-    public boolean authenticateContractor(String username,String password1){
-        User_contractor contractor= user.findByUsername(username);
-        return contractor!=null && password.matches(password1,contractor.getPassword());
+    public boolean authenticateContractor(String username, String rawPassword) {
+        User_contractor contractor = userRepository.findByUsername(username);
+        return contractor != null && passwordEncoder.matches(rawPassword, contractor.getPassword());
     }
 }

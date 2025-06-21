@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/supplier-requests")
-public class SupplierInteractionController {
+public class SupplierRequestController {
     @Autowired private SupplierRequestService service;
 
     @PostMapping
@@ -25,17 +25,21 @@ public class SupplierInteractionController {
         return ResponseEntity.ok(service.createRequest(req));
     }
 
-    @GetMapping
-    public List<SupplierRequest> getRequests(@RequestParam String supplierId) {
-        return service.getRequestsBySupplier(supplierId);
+    @PostMapping("/{id}/status")
+    public ResponseEntity<SupplierRequest> updateStatus(
+        @PathVariable String id,
+        @RequestParam String status
+    ) {
+        return ResponseEntity.ok(service.updateStatus(id, status));
     }
 
-    @PostMapping("/{id}/respond")
-    public ResponseEntity<SupplierResponse> respond(
-            @PathVariable String id,
-            @RequestBody SupplierResponse response
-    ) {
-        return ResponseEntity.ok(service.respond(id, response));
+    @GetMapping("/supplier/{supplierId}")
+    public List<SupplierRequest> forSupplier(@PathVariable String supplierId) {
+        return service.getSupplierRequests(supplierId);
+    }
+
+    @GetMapping("/contractor/{contractorId}")
+    public List<SupplierRequest> forContractor(@PathVariable String contractorId) {
+        return service.getContractorRequests(contractorId);
     }
 }
-

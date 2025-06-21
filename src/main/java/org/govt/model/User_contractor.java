@@ -28,50 +28,29 @@ public class User_contractor implements UserDetails {
     private boolean approved;
     private String pincode;
 
-    public User_contractor(String name,String username, String password,String DOB,long phone,String email,String gst_number,String address,String pincode){
-        this.name=name;
-        this.username=username;
-        this.password=password;
-        this.DOB=DOB;
-        this.phone=phone;
-        this.email=email;
-        this.gst_number=gst_number;
-        this.address=address;
-        this.pincode=pincode;
-        this.approved=false;
-    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
     @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return false;
     }
 }

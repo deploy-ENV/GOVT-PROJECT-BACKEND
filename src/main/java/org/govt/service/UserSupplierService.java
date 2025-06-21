@@ -11,31 +11,26 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserSupplierService {
-    private final UserSupplierRepository user;
-    private final PasswordEncoder password;
+    @Autowired
+    private UserSupplierRepository userSupplierRepository;
+    @Autowired
+    private  PasswordEncoder password;
 
     @Autowired
     JwtUtil jwt =new JwtUtil();
 
-    public UserSupplierService(UserSupplierRepository user){
-        this.user=user;
-        this.password=new BCryptPasswordEncoder();
-    }
-
-    public Register registerSupplier(String name, String username, String password1, String DOB, long phone, String email, String gst_number, String address,String pincode){
-        if(user.findByUsername(username)!=null){
+    public Register registerSupplier(User_Supplier userSupplier){
+        if(userSupplierRepository.findByUsername(userSupplier.getUsername())!=null){
             return new Register("User Already Exists!!","");
         }
-        User_Supplier Supplier=new User_Supplier(name,username,password1,DOB,phone,email,gst_number,address,pincode);
-        String hash=password.encode(password1);
-        Supplier.setPassword(hash);
-        user.save(Supplier);
-        return new Register("User Registered!!!", jwt.generateToken(username));
+        userSupplier.setPassword(password.encode(userSupplier.getPassword()));
+        userSupplierRepository.save(userSupplier);
+        return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()));
     }
 
     public boolean authenticateSupplier(String username,String password1){
         BCryptPasswordEncoder pass=new BCryptPasswordEncoder();
-        User_Supplier supplier=user.findByUsername(username);
+        User_Supplier supplier= userSupplierRepository.findByUsername(username);
         return supplier!=null && password.matches(password1,supplier.getPassword());
     }
 }

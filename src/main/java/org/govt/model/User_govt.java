@@ -1,5 +1,6 @@
 package org.govt.model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -11,8 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Document (collection = "govt_officers")
-@Getter
-@Setter
+@Data
 public class User_govt implements UserDetails {
     @Id
     private String id;
@@ -28,49 +28,43 @@ public class User_govt implements UserDetails {
     private boolean approved;
 
 
-    public User_govt(String name,String username, String password,String DOB,String email,String govt_Id,String govt_department,String pincode){
-        this.name=name;
-        this.username=username;
-        this.password=password;
-        this.DOB=DOB;
-        this.email=email;
-        this.govt_Id=govt_Id;
-        this.govt_department=govt_department;
-        this.pincode=pincode;
-        this.approved=false;
-    }
+    /**
+     * @return
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
+    /**
+     * @return
+     */
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return false;
     }
 
+    /**
+     * @return
+     */
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return false;
     }
 
+    /**
+     * @return
+     */
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return false;
     }
 
+    /**
+     * @return
+     */
     @Override
     public boolean isEnabled() {
-        return true;
+        return false;
     }
 }
