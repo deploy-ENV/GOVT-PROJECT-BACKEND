@@ -25,6 +25,8 @@ public class User_Supplier implements UserDetails {
     private String email;
     private String gst_number;
     private String address;
+    private String zone;
+private List<String> materialsSupplied;
     private String pincode;
     private boolean approved;
 

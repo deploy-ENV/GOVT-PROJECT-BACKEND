@@ -12,12 +12,14 @@ import lombok.Data;
 public class SupplierRequest {
     @Id
     private String id;
+    private String projectId;
     private String contractorId;
     private String supplierId;
-    private String projectId;
-    private String materialName;
-    private String quantity;
-    private String status; 
-    private LocalDate createdAt;
+    private String itemName;
+    private String itemDescription;
+    private int quantity;
+    private String status; // PENDING, APPROVED, REJECTED, DELIVERED
+    private LocalDate requestedAt;
+    private LocalDate fulfilledAt;
 }
 

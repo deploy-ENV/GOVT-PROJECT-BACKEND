@@ -12,27 +12,26 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 public class ContractorAuth {
-    private UserContractorService user;
+    @Autowired private UserContractorService userContractorService;
 
     @Autowired
-    private JwtUtil jwt= new JwtUtil();
+    private JwtUtil jwt;
 
-    public ContractorAuth(UserContractorService user){
-        this.user=user;
-    }
+
 
     @PostMapping("/register/contractor")
-    public Register register(@RequestBody User_contractor user1){
-        return user.registerContractor(user1.getName(),user1.getUsername(),user1.getPassword(),user1.getDOB(),user1.getPhone(),user1.getEmail(),user1.getGst_number(),user1.getAddress(),user1.getPincode());
+    public Register register(@RequestBody User_contractor user){
+        return userContractorService.registerContractor(user);
     }
 
     @PostMapping("/login/contractor")
     public Login login(@RequestBody User_contractor user1){
-        if(user.authenticateContractor(user1.getUsername(),user1.getPassword())){
+        if(userContractorService.authenticateContractor(user1.getUsername(),user1.getPassword())){
             return new Login("LoggedIn Successfully!!!",jwt.generateToken(user1.getUsername()));
         }
         else{
             return new Login("Invalid Credentials!!!","");
         }
     }
+
 }

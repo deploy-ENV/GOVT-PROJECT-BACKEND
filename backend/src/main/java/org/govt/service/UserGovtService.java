@@ -11,30 +11,30 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserGovtService {
-    private final UserGovtRepository user;
-    private final PasswordEncoder password;
+    @Autowired
+    private UserGovtRepository userGovtRepository;
+    @Autowired
+    private PasswordEncoder password;
 
     @Autowired
-    private JwtUtil jwt=new JwtUtil();
+    private JwtUtil jwt;
 
     public UserGovtService(UserGovtRepository user){
-        this.user=user;
+        this.userGovtRepository =user;
         this.password=new BCryptPasswordEncoder();
     }
 
-    public Register registerGovt(String name, String username, String password1, String DOB, String email, String govt_Id, String govt_department,String pincode){
-        if(user.findByUsername(username)!=null){
+    public Register registerGovt(User_govt userGovt){
+        if(userGovtRepository.findByUsername(userGovt.getGovt_Id())!=null){
             return new Register("User Already Exists!!!!","");
         }
-        User_govt userGovt=new User_govt(name,username,password1,DOB,email,govt_Id,govt_department,pincode);
-        String hash=password.encode(password1);
-        userGovt.setPassword(hash);
-        user.save(userGovt);
-        return new Register("Registered Successfully!!!", jwt.generateToken(username));
+        userGovt.setPassword(userGovt.getPassword());
+        userGovtRepository.save(userGovt);
+        return new Register("Registered Successfully!!!", jwt.generateToken(userGovt.getUsername()));
     }
 
     public boolean authenticateGovt(String username,String pass){
-        User_govt govt=user.findByUsername(username);
+        User_govt govt= userGovtRepository.findByUsername(username);
         return govt!=null && password.matches(pass,govt.getPassword());
     }
 

@@ -15,21 +15,23 @@ public class FundService {
     @Autowired private FundTransactionRepository fundRepo;
     @Autowired private ProjectRepository projectRepo;
 
-    public FundTransaction requestFund(FundTransaction txn) {
-        txn.setStatus("PENDING");
-        txn.setTimestamp(LocalDate.now());
-        return fundRepo.save(txn);
-    }
+   public FundTransaction requestFund(FundTransaction txn) {
+txn.setStatus("PENDING");
+txn.setTimestamp(LocalDate.now());
+return fundRepo.save(txn);
+}
+    
 
     public FundTransaction approveFund(String txnId, boolean approve) {
         FundTransaction txn = fundRepo.findById(txnId).orElseThrow();
         txn.setStatus(approve ? "APPROVED" : "REJECTED");
-        if (approve) {
-            Project p = projectRepo.findById(txn.getProjectId()).orElseThrow();
-            BigDecimal newAmount = p.getBudgetApproved().add(txn.getAmount());
-            p.setBudgetApproved(newAmount);
-            projectRepo.save(p);
-        }
-        return fundRepo.save(txn);
+       if (approve) {
+    Project project = projectRepo.findById(txn.getProjectId()).orElseThrow();
+    BigDecimal current = project.getBudgetApproved();
+    project.setBudgetApproved(current.subtract(txn.getAmount()));
+    projectRepo.save(project);
+}
+
+return fundRepo.save(txn);
     }
 }

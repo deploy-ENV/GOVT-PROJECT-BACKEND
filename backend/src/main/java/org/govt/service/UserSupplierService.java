@@ -1,41 +1,51 @@
 package org.govt.service;
 
+import java.util.List;
+
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Register;
+import org.govt.model.Project;
 import org.govt.model.User_Supplier;
+import org.govt.repository.ProjectRepository;
 import org.govt.repository.UserSupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserSupplierService {
-    private final UserSupplierRepository user;
-    private final PasswordEncoder password;
+    @Autowired
+    private UserSupplierRepository userSupplierRepository;
+    @Autowired
+    private  PasswordEncoder password;
+    @Autowired
+    private ProjectRepository projectRepo;
+    @Autowired
+    private UserSupplierRepository supplierRepo;
 
     @Autowired
     JwtUtil jwt =new JwtUtil();
+public List<User_Supplier> autoFetchSuppliers(String projectId) {
+    Project project = projectRepo.findById(projectId).orElseThrow();
 
-    public UserSupplierService(UserSupplierRepository user){
-        this.user=user;
-        this.password=new BCryptPasswordEncoder();
-    }
-
-    public Register registerSupplier(String name, String username, String password1, String DOB, long phone, String email, String gst_number, String address,String pincode){
-        if(user.findByUsername(username)!=null){
+    // Simple example: match by pincode (zone)
+    String zone = project.getZone(); // Ensure project.getZone() exists
+    return supplierRepo.findByPincode(zone);
+}
+    public Register registerSupplier(User_Supplier userSupplier){
+        if(userSupplierRepository.findByUsername(userSupplier.getUsername())!=null){
             return new Register("User Already Exists!!","");
         }
-        User_Supplier Supplier=new User_Supplier(name,username,password1,DOB,phone,email,gst_number,address,pincode);
-        String hash=password.encode(password1);
-        Supplier.setPassword(hash);
-        user.save(Supplier);
-        return new Register("User Registered!!!", jwt.generateToken(username));
+        userSupplier.setPassword(password.encode(userSupplier.getPassword()));
+        userSupplierRepository.save(userSupplier);
+        return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()));
     }
 
     public boolean authenticateSupplier(String username,String password1){
         BCryptPasswordEncoder pass=new BCryptPasswordEncoder();
-        User_Supplier supplier=user.findByUsername(username);
+        User_Supplier supplier= userSupplierRepository.findByUsername(username);
         return supplier!=null && password.matches(password1,supplier.getPassword());
     }
 }

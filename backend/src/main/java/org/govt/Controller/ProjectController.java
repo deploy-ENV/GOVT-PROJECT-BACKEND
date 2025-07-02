@@ -17,20 +17,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
-    @Autowired private ProjectService service;
+   @Autowired
+private ProjectService projectService;
 
-    @PostMapping
-    public ResponseEntity<Project> create(@RequestBody Project p) {
-        return ResponseEntity.ok(service.createProject(p));
-    }
+// Create a project (by PM)
+@PostMapping
+public ResponseEntity<Project> createProject(@RequestBody Project project,
+                                             @RequestParam String pmId,
+                                             @RequestParam String departmentId,
+                                             @RequestParam String pmName) {
+    Project saved = projectService.createProject(project, pmId, departmentId, pmName);
+    return ResponseEntity.ok(saved);
+}
 
-    @GetMapping
-    public List<Project> getAll() {
-        return service.listProjects();
-    }
+// Get all projects posted by this PM
+@GetMapping("/mine")
+public ResponseEntity<List<Project>> getMyProjects(@RequestParam String pmId) {
+    List<Project> projects = projectService.listMyProjects(pmId);
+    return ResponseEntity.ok(projects);
+}
 
-    @PostMapping("/{id}/assign")
-    public ResponseEntity<Project> assign(@PathVariable String id, @RequestParam String contractorId) {
-        return ResponseEntity.ok(service.assignContractor(id, contractorId));
-    }
+// (Optional) Get project by ID
+@GetMapping("/{id}")
+public ResponseEntity<Project> getById(@PathVariable String id) {
+    return ResponseEntity.ok(projectService.getById(id));
+}
+@PostMapping("/{projectId}/finalize")
+public ResponseEntity<Project> finalizeAssignments(
+@PathVariable String projectId,
+@RequestParam String contractorId,
+@RequestParam String supervisorId
+) {
+return ResponseEntity.ok(projectService.finalizeProjectAssignments(projectId, contractorId, supervisorId));
+}
+
 }
