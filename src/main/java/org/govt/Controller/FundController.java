@@ -13,15 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/funds")
 public class FundController {
-    @Autowired private FundService service;
+   @Autowired private FundService fundService;
 
-    @PostMapping("/request")
-    public ResponseEntity<FundTransaction> requestFund(@RequestBody FundTransaction txn) {
-        return ResponseEntity.ok(service.requestFund(txn));
-    }
+@PostMapping("/request")
+public ResponseEntity<FundTransaction> requestFund(@RequestBody FundTransaction txn) {
+    return ResponseEntity.ok(fundService.requestFund(txn));
+}
 
-    @PostMapping("/approve")
-    public ResponseEntity<FundTransaction> approve(@RequestParam String txnId, @RequestParam boolean approve) {
-        return ResponseEntity.ok(service.approveFund(txnId, approve));
-    }
+@PostMapping("/approve")
+public ResponseEntity<FundTransaction> approveFund(
+    @RequestParam String txnId,
+    @RequestParam boolean approve) {
+    return ResponseEntity.ok(fundService.approveFund(txnId, approve));
+}
 }

@@ -20,6 +20,7 @@ public class User_Supervisor implements UserDetails {
     private String name;
     private String password;
     private String username;
+    private String zone;
     private String DOB;
     private long phone;
     private String email;

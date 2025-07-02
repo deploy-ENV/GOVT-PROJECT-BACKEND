@@ -1,5 +1,7 @@
 package org.govt.service;
 
+import java.util.List;
+
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Register;
 import org.govt.model.User_Supervisor;
@@ -16,6 +18,11 @@ public class UserSupervisorService {
 
     @Autowired
     private JwtUtil jwt=new JwtUtil();
+
+
+public List<User_Supervisor> getSupervisorsByZone(String zone) {
+    return userSupervisorRepository.findByZone(zone);
+}
 
     public UserSupervisorService(UserSupervisorRepository user){
         this.userSupervisorRepository =user;

@@ -3,7 +3,7 @@ package org.govt.service;
 import java.io.InputStream;
 import java.time.LocalDate;
 
-// import javax.management.Query; // Remove this line if present
+// import javax.management.Query;
 import org.springframework.data.mongodb.core.query.Query;
 
 import org.bson.types.ObjectId;
