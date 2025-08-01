@@ -1,14 +1,15 @@
-# Use OpenJDK image with JDK 17
+# ---- Stage 1: Build ----
+FROM maven:3.9.6-openjdk-17 AS build
+
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+# ---- Stage 2: Run ----
 FROM openjdk:17-jdk-slim
 
-# Set working directory
 WORKDIR /app
+COPY --from=build /app/target/govt_project-1.0-SNAPSHOT.jar app.jar
 
-# Copy the jar file (replace with your actual jar name)
-COPY target/*.jar app.jar
-
-# Expose port (Spring Boot default port)
 EXPOSE 8080
-
-# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]
