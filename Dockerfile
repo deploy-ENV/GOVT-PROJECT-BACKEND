@@ -1,8 +1,14 @@
-FROM maven:4.0.0-openjdk-17 AS build
-COPY . .
-RUN mvn clean package -DskipTests
+# Use OpenJDK image with JDK 17
+FROM openjdk:17-jdk-slim
 
-FROM openjdk:17.0.1-jdk-slim
-COPY --from=build /target/orman-0.0.1-SNAPSHOT.jar orman.jar
+# Set working directory
+WORKDIR /app
+
+# Copy the jar file (replace with your actual jar name)
+COPY target/*.jar app.jar
+
+# Expose port (Spring Boot default port)
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","orman.jar"]
+
+# Run the app
+ENTRYPOINT ["java", "-jar", "app.jar"]
