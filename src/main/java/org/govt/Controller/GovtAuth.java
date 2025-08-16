@@ -6,6 +6,8 @@ import org.govt.login_message.Register;
 import org.govt.model.User_govt;
 import org.govt.service.UserGovtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins="*")

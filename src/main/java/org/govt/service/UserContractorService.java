@@ -29,7 +29,7 @@ public class UserContractorService {
         return new Register("Registered successfully!!!", jwt.generateToken(userContractor.getUsername()));
     }
     public User_contractor findByUsername(String username) {
-        return UserContractorRepository.findByUsername(username);
+        return userRepository.findByUsername(username);
     }
 
     public boolean authenticateContractor(String username, String rawPassword) {
