@@ -30,13 +30,16 @@ public List<User_Supervisor> getSupervisorsByZone(String zone) {
     }
 
     public Register registerSupervisor(User_Supervisor user_supervisor){
-        if(userSupervisorRepository.findByUsername(user_supervisor.getUsername())!=null){
+        if(findByUsername(user_supervisor.getUsername())!=null){
             return new Register("User Already Exists!!!!","");
         }
 
         user_supervisor.setPassword(password.encode(user_supervisor.getPassword()));
         userSupervisorRepository.save(user_supervisor);
         return new Register("Registered Successfully!!!", jwt.generateToken(user_supervisor.getUsername()));
+    }
+    public User_Supervisor findByUsername(String username) {
+        return userSupervisorRepository.findByUsername(username);
     }
 
     public boolean authenticateSupervisor(String username,String pass){

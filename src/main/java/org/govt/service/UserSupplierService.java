@@ -35,12 +35,15 @@ public List<User_Supplier> autoFetchSuppliers(String projectId) {
     return supplierRepo.findByPincode(zone);
 }
     public Register registerSupplier(User_Supplier userSupplier){
-        if(userSupplierRepository.findByUsername(userSupplier.getUsername())!=null){
+        if(findByUsername(userSupplier.getUsername())!=null){
             return new Register("User Already Exists!!","");
         }
         userSupplier.setPassword(password.encode(userSupplier.getPassword()));
         userSupplierRepository.save(userSupplier);
         return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()));
+    }
+    public User_Supplier findByUsername(String username) {
+        return userSupplierRepository.findByUsername(username);
     }
 
     public boolean authenticateSupplier(String username,String password1){

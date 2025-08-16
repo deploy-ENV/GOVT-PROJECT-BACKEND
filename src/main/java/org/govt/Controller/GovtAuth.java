@@ -22,14 +22,22 @@ public class GovtAuth {
     public Register register(@RequestBody User_govt userGovt){
         return userGovtService.registerGovt(userGovt);
     }
+   
 
     @PostMapping("/login/govt")
-    public Login login(@RequestBody User_govt userGovt){
-        if(userGovtService.authenticateGovt(userGovt.getUsername(), userGovt.getPassword())){
-            return new Login("LoggedIn Successfully!!!",jwt.generateToken(userGovt.getUsername()));
-        }
-        else{
-            return new Login("Invalid Credentials!!!","");
-        }
+public ResponseEntity<Login<User_govt>> login(@RequestBody User_govt userGovt) {
+    if (userGovtService.authenticateGovt(userGovt.getUsername(), userGovt.getPassword())) {
+        return ResponseEntity.ok(
+            new Login<>(
+                "LoggedIn Successfully!!!",
+                jwt.generateToken(userGovt.getUsername()),
+                userGovtService.findByUsername(userGovt.getUsername()) 
+            )
+        );
+    } else {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new Login<>("Invalid Credentials!!!", "", null));
     }
+}
+
 }

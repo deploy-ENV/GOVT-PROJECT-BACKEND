@@ -6,29 +6,43 @@ import org.govt.login_message.Register;
 import org.govt.model.User_Supervisor;
 import org.govt.service.UserSupervisorService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
+@RestController
+@RequestMapping("/auth")
 public class SupervisorAuth {
+
     @Autowired
     private UserSupervisorService userSupervisorService;
-
 
     @Autowired
     private JwtUtil jwt;
 
     @PostMapping("/register/supervisor")
-    public Register register(@RequestBody User_Supervisor userGovt){
-        return userSupervisorService.registerSupervisor(userGovt);
+    public Register register(@RequestBody User_Supervisor userSupervisor) {
+        return userSupervisorService.registerSupervisor(userSupervisor);
     }
 
     @PostMapping("/login/supervisor")
-    public Login login(@RequestBody User_Supervisor user_supervisor){
-        if(userSupervisorService.authenticateSupervisor(user_supervisor.getUsername(), user_supervisor.getPassword())){
-            return new Login("LoggedIn Successfully!!!",jwt.generateToken(user_supervisor.getUsername()));
-        }
-        else{
-            return new Login("Invalid Credentials!!!","");
+    public ResponseEntity<Login<User_Supervisor>> login(@RequestBody User_Supervisor userSupervisor) {
+        User_Supervisor supervisor = userSupervisorService.findByUsername(userSupervisor.getUsername());
+
+        if (supervisor != null && supervisor.getPassword().equals(userSupervisor.getPassword())) {
+           
+            String token = jwt.generateToken(supervisor.getUsername());
+            return ResponseEntity.ok(
+                new Login<>(
+                    "LoggedIn Successfully!!!",
+                    token,
+                    supervisor
+                )
+            );
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new Login<>("Invalid Credentials!!!", "", null));
         }
     }
 }

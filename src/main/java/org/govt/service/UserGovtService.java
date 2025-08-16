@@ -25,12 +25,15 @@ public class UserGovtService {
     }
 
     public Register registerGovt(User_govt userGovt){
-        if(userGovtRepository.findByUsername(userGovt.getGovt_Id())!=null){
+        if(findByUsername(userGovt.getUsername())!=null){
             return new Register("User Already Exists!!!!","");
         }
         userGovt.setPassword(userGovt.getPassword());
         userGovtRepository.save(userGovt);
         return new Register("Registered Successfully!!!", jwt.generateToken(userGovt.getUsername()));
+    }
+     public User_govt findByUsername(String username) {
+        return userGovtRepository.findByUsername(username);
     }
 
     public boolean authenticateGovt(String username,String pass){

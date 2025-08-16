@@ -22,14 +22,16 @@ public class UserProjectManagerService {
 
 
     public Register registerProjectManager(User_ProjectManager user_projectManager){
-        if(userProjectManagerRepository.findByUsername(user_projectManager.getUsername())!=null){
+        if(findByUsername(user_projectManager.getUsername())!=null){
             return new Register("User Already Exists!!!!","");
         }
         user_projectManager.setPassword(password.encode(user_projectManager.getPassword()));
         userProjectManagerRepository.save(user_projectManager);
         return new Register("Registered Successfully!!!", jwt.generateToken(user_projectManager.getUsername()));
     }
-
+public User_ProjectManager findByUsername(String username) {
+        return userProjectManagerRepository.findByUsername(username);
+    }
     public boolean authenticateProjectManager(String username,String pass){
         User_ProjectManager user1= userProjectManagerRepository.findByUsername(username);
         return user1!=null && password.matches(pass,user1.getPassword());

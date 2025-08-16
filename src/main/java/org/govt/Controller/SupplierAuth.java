@@ -6,6 +6,8 @@ import org.govt.login_message.Register;
 import org.govt.model.User_Supplier;
 import org.govt.service.UserSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*")
@@ -25,13 +27,22 @@ public class SupplierAuth {
     }
 
     @PostMapping("/login/supplier")
-    public Login login(@RequestBody User_Supplier userSupplier){
-        if(userSupplierService.authenticateSupplier(userSupplier.getUsername(), userSupplier.getPassword())){
-            String token = jwt.generateToken("himanshu3");
-            return new Login("LoggedIn Successfully!!!",token);
-        }
-        else{
-            return new Login("Invalid Credentials!!!","");
+    public ResponseEntity<Login<User_Supplier>> login(@RequestBody User_Supplier userSupplier) {
+        User_Supplier supplier = userSupplierService.findByUsername(userSupplier.getUsername());
+
+        if (supplier != null && supplier.getPassword().equals(userSupplier.getPassword())) {
+          
+            String token = jwt.generateToken(supplier.getUsername());
+            return ResponseEntity.ok(
+                new Login<>(
+                    "LoggedIn Successfully!!!",
+                    token,
+                    supplier
+                )
+            );
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new Login<>("Invalid Credentials!!!", "", null));
         }
     }
 }

@@ -6,49 +6,46 @@ import org.govt.model.Project;
 import org.govt.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
-   @Autowired
-private ProjectService projectService;
 
-// Create a project (by PM)
-@PostMapping
-public ResponseEntity<Project> createProject(@RequestBody Project project,
-                                             @RequestParam String pmId,
-                                             @RequestParam String departmentId,
-                                             @RequestParam String pmName) {
-    Project saved = projectService.createProject(project, pmId, departmentId, pmName);
-    return ResponseEntity.ok(saved);
-}
+    @Autowired
+    private ProjectService projectService;
 
-// Get all projects posted by this PM
-@GetMapping("/mine")
-public ResponseEntity<List<Project>> getMyProjects(@RequestParam String pmId) {
-    List<Project> projects = projectService.listMyProjects(pmId);
-    return ResponseEntity.ok(projects);
-}
 
-// (Optional) Get project by ID
-@GetMapping("/{id}")
-public ResponseEntity<Project> getById(@PathVariable String id) {
-    return ResponseEntity.ok(projectService.getById(id));
-}
-@PostMapping("/{projectId}/finalize")
-public ResponseEntity<Project> finalizeAssignments(
-@PathVariable String projectId,
-@RequestParam String contractorId,
-@RequestParam String supervisorId
-) {
-return ResponseEntity.ok(projectService.finalizeProjectAssignments(projectId, contractorId, supervisorId));
-}
+    @PostMapping("/pm/{pmId}/dept/{departmentId}/name/{pmName}")
+    public ResponseEntity<Project> createProject(@RequestBody Project project,
+                                                 @PathVariable String pmId,
+                                                 @PathVariable String departmentId,
+                                                 @PathVariable String pmName) {
+        Project saved = projectService.createProject(project, pmId, departmentId, pmName);
+        return ResponseEntity.ok(saved);
+    }
 
+
+    @GetMapping("/pm/{pmId}")
+    public ResponseEntity<List<Project>> getMyProjects(@PathVariable String pmId) {
+        List<Project> projects = projectService.listMyProjects(pmId);
+        return ResponseEntity.ok(projects);
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Project> getById(@PathVariable String id) {
+        return ResponseEntity.ok(projectService.getById(id));
+    }
+
+  
+    @PostMapping("/{projectId}/finalize/contractor/{contractorId}/supervisor/{supervisorId}")
+    public ResponseEntity<Project> finalizeAssignments(
+            @PathVariable String projectId,
+            @PathVariable String contractorId,
+            @PathVariable String supervisorId) {
+        return ResponseEntity.ok(
+            projectService.finalizeProjectAssignments(projectId, contractorId, supervisorId)
+        );
+    }
 }
