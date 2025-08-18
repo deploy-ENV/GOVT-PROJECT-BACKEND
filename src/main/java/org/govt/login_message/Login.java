@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class Login<T> {
     private String message;
     private String token;
-    private T data;  // Generic payload (e.g., UserGovt, UserDept, UserManager)
+    private T data;  
 }

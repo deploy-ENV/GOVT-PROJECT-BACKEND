@@ -8,6 +8,8 @@ import org.govt.service.UserProjectManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins="*")
@@ -17,7 +19,7 @@ public class ProjectManagerAuth {
 
     @Autowired
     private UserProjectManagerService userProjectManagerService;
-
+private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private JwtUtil jwt;
 
@@ -30,7 +32,7 @@ public class ProjectManagerAuth {
     public ResponseEntity<Login<User_ProjectManager>> login(@RequestBody User_ProjectManager userProjectManager) {
         User_ProjectManager manager = userProjectManagerService.findByUsername(userProjectManager.getUsername());
 
-        if (manager != null && manager.getPassword().equals(userProjectManager.getPassword())) {
+        if (manager != null && passwordEncoder.matches(userProjectManager.getPassword(), manager.getPassword())) {
             String token = jwt.generateToken(manager.getUsername());
             return ResponseEntity.ok(
                 new Login<>(

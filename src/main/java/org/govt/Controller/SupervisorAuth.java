@@ -8,6 +8,8 @@ import org.govt.service.UserSupervisorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*")
@@ -17,7 +19,7 @@ public class SupervisorAuth {
 
     @Autowired
     private UserSupervisorService userSupervisorService;
-
+private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private JwtUtil jwt;
 
@@ -30,7 +32,7 @@ public class SupervisorAuth {
     public ResponseEntity<Login<User_Supervisor>> login(@RequestBody User_Supervisor userSupervisor) {
         User_Supervisor supervisor = userSupervisorService.findByUsername(userSupervisor.getUsername());
 
-        if (supervisor != null && supervisor.getPassword().equals(userSupervisor.getPassword())) {
+        if (supervisor != null && passwordEncoder.matches(userSupervisor.getPassword(), supervisor.getPassword())) {
            
             String token = jwt.generateToken(supervisor.getUsername());
             return ResponseEntity.ok(

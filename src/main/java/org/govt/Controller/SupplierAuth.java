@@ -8,6 +8,8 @@ import org.govt.service.UserSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*")
@@ -17,7 +19,7 @@ public class SupplierAuth {
 
     @Autowired
     private UserSupplierService userSupplierService;
-
+private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private JwtUtil jwt;
 
@@ -30,7 +32,7 @@ public class SupplierAuth {
     public ResponseEntity<Login<User_Supplier>> login(@RequestBody User_Supplier userSupplier) {
         User_Supplier supplier = userSupplierService.findByUsername(userSupplier.getUsername());
 
-        if (supplier != null && supplier.getPassword().equals(userSupplier.getPassword())) {
+        if (supplier != null && passwordEncoder.matches(userSupplier.getPassword(), supplier.getPassword())) {
           
             String token = jwt.generateToken(supplier.getUsername());
             return ResponseEntity.ok(
