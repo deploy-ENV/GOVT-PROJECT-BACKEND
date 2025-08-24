@@ -73,4 +73,8 @@ project.setStatus(ProjectStatus.IN_PROGRESS); // or ASSIGNED
 return projectRepository.save(project);
 
 }
+
+public List<Project> listAllProjects() {
+    return projectRepository.findAll();
+}
 }

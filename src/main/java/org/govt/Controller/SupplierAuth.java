@@ -19,7 +19,7 @@ public class SupplierAuth {
 
     @Autowired
     private UserSupplierService userSupplierService;
-private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private JwtUtil jwt;
 

@@ -24,6 +24,11 @@ public class ProjectController {
         Project saved = projectService.createProject(project, pmId, departmentId, pmName);
         return ResponseEntity.ok(saved);
     }
+    @GetMapping("/all")
+    public ResponseEntity<List<Project>> getAllProjects() {
+        List<Project> projects = projectService.listAllProjects();
+        return ResponseEntity.ok(projects);
+    }
 
 
     @GetMapping("/pm/{pmId}")
