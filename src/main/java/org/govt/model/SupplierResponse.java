@@ -15,5 +15,5 @@ public class SupplierResponse {
     private String supplierRequestId;
     private String responseNote;
     private String deliveryStatus; // PENDING, DELIVERED
-    private LocalDate responseDate;
+    private String responseDate;
 }

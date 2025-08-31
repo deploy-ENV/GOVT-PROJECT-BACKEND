@@ -21,7 +21,7 @@ private String updateText;
 private List<String> imageFileIds;  // GridFS file IDs
 private int progressPercent; // e.g., 40%
 
-private LocalDate submittedAt;
+private String submittedAt;
 private boolean verified;   // marked by supervisor
 private String verificationComment;
 

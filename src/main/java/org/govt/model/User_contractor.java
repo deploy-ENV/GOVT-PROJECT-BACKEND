@@ -3,6 +3,7 @@ package org.govt.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,9 +25,9 @@ public class User_contractor implements UserDetails {
     private long phone;
     private String email;
     private String gst_number;
-    private String address;
+    private  Address address;
     private boolean approved;
-    private String pincode;
+    
 
 
     @Override

@@ -16,7 +16,7 @@ public class Bid {
 private String contractorId;
 private String contractorName;
 
-private BigDecimal bidAmount;
+private int bidAmount;
 private String timelineEstimate;
 private String materialsPlan;
 private String proposalText;
@@ -24,7 +24,7 @@ private String proposalText;
 private int experienceMatchPercent;
 private String status; // PENDING, ACCEPTED, REJECTED
 
-private LocalDate submittedAt;
+private String submittedAt;
 
   
 }

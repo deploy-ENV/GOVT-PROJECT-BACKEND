@@ -19,7 +19,7 @@ public class SupplierPaymentService {
 
     public SupplierPaymentRequest requestPayment(SupplierPaymentRequest req) {
         req.setStatus("PENDING");
-        req.setRequestedAt(LocalDate.now());
+        req.setRequestedAt(LocalDate.now().toString());
         return repo.save(req);
     }
 
@@ -27,7 +27,7 @@ public class SupplierPaymentService {
         SupplierPaymentRequest req = repo.findById(requestId).orElseThrow();
         req.setStatus("VERIFIED");
         req.setVerifiedBy(supervisorId);
-        req.setVerifiedAt(LocalDate.now());
+        req.setVerifiedAt(LocalDate.now().toString());
         return repo.save(req);
     }
 
@@ -38,12 +38,12 @@ public class SupplierPaymentService {
         }
 
         Project p = projectRepo.findById(req.getProjectId()).orElseThrow();
-        if (p.getBudgetApproved().compareTo(req.getAmount()) < 0) {
+        if (p.getBudgetApproved() < req.getAmount()) {
             throw new IllegalStateException("Insufficient budget");
         }
 
         // Deduct from project budget
-        p.setBudgetApproved(p.getBudgetApproved().subtract(req.getAmount()));
+        p.setBudgetApproved(p.getBudgetApproved() - req.getAmount());
         projectRepo.save(p);
 
         // Create FundTransaction
@@ -56,14 +56,14 @@ public class SupplierPaymentService {
         txn.setAmount(req.getAmount());
         txn.setPurpose("SUPPLIER_PAYMENT");
         txn.setStatus("APPROVED");
-        txn.setTimestamp(LocalDate.now());
+        txn.setTimestamp(LocalDate.now().toString());
         fundRepo.save(txn);
 
         // Update payment request
         req.setStatus("PAID");
         req.setApprovedBy(approverId);
-        req.setApprovedAt(LocalDate.now());
-        req.setPaidAt(LocalDate.now());
+        req.setApprovedAt(LocalDate.now().toString());
+        req.setPaidAt(LocalDate.now().toString());
 
         return repo.save(req);
     }

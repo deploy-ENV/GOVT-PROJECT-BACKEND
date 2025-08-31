@@ -16,7 +16,7 @@ public class SupplierRequestService {
 
     public SupplierRequest createRequest(SupplierRequest req) {
         req.setStatus("PENDING");
-        req.setRequestedAt(LocalDate.now());
+        req.setRequestedAt(LocalDate.now().toString());
         return requestRepo.save(req);
     }
 
@@ -24,7 +24,7 @@ public class SupplierRequestService {
         SupplierRequest req = requestRepo.findById(id).orElseThrow();
         req.setStatus(status);
         if ("DELIVERED".equals(status)) {
-            req.setFulfilledAt(LocalDate.now());
+            req.setFulfilledAt(LocalDate.now().toString());
         }
         return requestRepo.save(req);
     }

@@ -26,7 +26,7 @@ public Project createProject(Project project, String pmId, String departmentId, 
     project.setProjectManagerId(pmId);
     project.setDepartmentId(departmentId);
     project.setCreatedByName(pmName);
-    project.setCreatedAt(LocalDate.now());
+    project.setCreatedAt(LocalDate.now().toString());
     project.setStatus(ProjectStatus.BIDDING); // default to BIDDING when created
 
     return projectRepository.save(project);

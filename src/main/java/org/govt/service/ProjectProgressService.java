@@ -12,7 +12,7 @@ public class ProjectProgressService {
     @Autowired private ProjectProgressRepository progressRepo;
 
 public ProjectProgress submitProgress(ProjectProgress progress) {
-    progress.setSubmittedAt(LocalDate.now());
+    progress.setSubmittedAt(LocalDate.now().toString());
     progress.setVerified(false);
     return progressRepo.save(progress);
 }

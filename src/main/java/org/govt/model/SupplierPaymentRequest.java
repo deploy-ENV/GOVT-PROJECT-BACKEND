@@ -17,13 +17,13 @@ public class SupplierPaymentRequest {
     private String supplierId;
     private String contractorId;
     private String itemDescription;
-    private BigDecimal amount;
+    private int amount;
     private String status; // PENDING, VERIFIED, APPROVED, REJECTED, PAID
     private String requestedBy; // contractorId
     private String verifiedBy;  // supervisorId
     private String approvedBy;  // PM or DeptAdmin
-    private LocalDate requestedAt;
-    private LocalDate verifiedAt;
-    private LocalDate approvedAt;
-    private LocalDate paidAt;
+    private String requestedAt;
+    private String verifiedAt;
+    private String approvedAt;
+    private String paidAt;
 }

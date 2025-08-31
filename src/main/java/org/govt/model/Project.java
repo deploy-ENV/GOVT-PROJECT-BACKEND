@@ -19,22 +19,22 @@ private String id;
 private String title;
 private String description;
 private String departmentId;    // inferred from PM
-private String zone;
+private Address location;
 
 // PM Info
 private String projectManagerId;
 private String createdByName;
 
 // Timeline
-private LocalDate expectedStartDate;
-private LocalDate deadline;
-private LocalDate bidSubmissionDeadline;
-private LocalDate createdAt;
+private String expectedStartDate;
+private String deadline;
+private String bidSubmissionDeadline;
+private String createdAt;
 
 // Budget
-private BigDecimal totalBudget;
-private BigDecimal budgetApproved = BigDecimal.ZERO;
-private BigDecimal budgetUsed = BigDecimal.ZERO;
+private int totalBudget;
+private int budgetApproved = 0;
+private int budgetUsed = 0;
 
 // Contractor Requirements
 private String contractorRequirements; // skills, license types, etc.

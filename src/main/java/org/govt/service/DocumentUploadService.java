@@ -34,7 +34,7 @@ public DocumentUpload upload(MultipartFile file, String entityType, String entit
     doc.setFileSize(file.getSize());
     doc.setUploadedBy(userId);
     doc.setRole(role);
-    doc.setUploadedAt(LocalDate.now());
+    doc.setUploadedAt(LocalDate.now().toString());
 
     doc.setEntityType(entityType);     // generic type like "project", "bid", etc.
     doc.setEntityId(entityId);         // ID of the entity (e.g. project ID)

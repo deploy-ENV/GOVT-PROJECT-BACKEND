@@ -24,13 +24,11 @@ public class User_Supplier implements UserDetails {
     private long phone;
     private String email;
     private String gst_number;
-    private String address;
-    private String zone;
+    private Address address;
 private List<String> materialsSupplied;
-    private String pincode;
     private boolean approved;
 
-    public User_Supplier(String name, String username, String password, String DOB, long phone, String email, String gst_number, String address, String pincode){
+    public User_Supplier(String name, String username, String password, String DOB, long phone, String email, String gst_number, Address address){
         this.name=name;
         this.username=username;
         this.password=password;
@@ -39,7 +37,6 @@ private List<String> materialsSupplied;
         this.email=email;
         this.gst_number=gst_number;
         this.address=address;
-        this.pincode=pincode;
         this.approved=false;
     }
     @Override

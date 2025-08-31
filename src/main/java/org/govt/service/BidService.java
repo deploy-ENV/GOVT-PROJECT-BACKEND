@@ -24,7 +24,7 @@ public Bid submitBid(Bid bid) {
     if (bidRepository.findByProjectIdAndContractorId(bid.getProjectId(), bid.getContractorId()).isPresent()) {
         throw new RuntimeException("You already submitted a bid for this project.");
     }
-    bid.setSubmittedAt(LocalDate.now());
+    bid.setSubmittedAt(LocalDate.now().toString());
     bid.setStatus("PENDING");
     return bidRepository.save(bid);
 }

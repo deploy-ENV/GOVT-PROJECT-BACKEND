@@ -31,8 +31,8 @@ public List<User_Supplier> autoFetchSuppliers(String projectId) {
     Project project = projectRepo.findById(projectId).orElseThrow();
 
     // Simple example: match by pincode (zone)
-    String zone = project.getZone(); // Ensure project.getZone() exists
-    return supplierRepo.findByPincode(zone);
+    String zone = project.getLocation().getZipCode();
+    return supplierRepo.findByAddress(project.getLocation());
 }
     public Register registerSupplier(User_Supplier userSupplier){
         if(findByUsername(userSupplier.getUsername())!=null){

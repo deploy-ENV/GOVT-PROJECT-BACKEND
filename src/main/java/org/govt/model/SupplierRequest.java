@@ -19,7 +19,7 @@ public class SupplierRequest {
     private String itemDescription;
     private int quantity;
     private String status; // PENDING, APPROVED, REJECTED, DELIVERED
-    private LocalDate requestedAt;
-    private LocalDate fulfilledAt;
+    private String requestedAt;
+    private String fulfilledAt;
 }
 

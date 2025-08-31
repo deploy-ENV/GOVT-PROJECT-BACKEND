@@ -25,12 +25,11 @@ public class User_Supervisor implements UserDetails {
     private long phone;
     private String email;
     private String gst_number;
-    private String address;
-    private String pincode;
+    private Address address;
     private boolean approved;
     private String[] connected;
 
-    public User_Supervisor(String name, String username, String password, String DOB, String email, String gst_number, String address, String pincode){
+    public User_Supervisor(String name, String username, String password, String DOB, String email, String gst_number, Address address){
         this.name=name;
         this.username=username;
         this.password=password;
@@ -39,7 +38,6 @@ public class User_Supervisor implements UserDetails {
         this.email=email;
         this.gst_number=gst_number;
         this.address=address;
-        this.pincode=pincode;
         this.approved=false;
     }
     @Override

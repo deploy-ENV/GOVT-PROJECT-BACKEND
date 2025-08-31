@@ -17,7 +17,7 @@ public class FundService {
 
    public FundTransaction requestFund(FundTransaction txn) {
 txn.setStatus("PENDING");
-txn.setTimestamp(LocalDate.now());
+txn.setTimestamp(LocalDate.now().toString());
 return fundRepo.save(txn);
 }
     
@@ -27,8 +27,8 @@ return fundRepo.save(txn);
         txn.setStatus(approve ? "APPROVED" : "REJECTED");
        if (approve) {
     Project project = projectRepo.findById(txn.getProjectId()).orElseThrow();
-    BigDecimal current = project.getBudgetApproved();
-    project.setBudgetApproved(current.subtract(txn.getAmount()));
+    int current = project.getBudgetApproved();
+    project.setBudgetApproved(current-(txn.getAmount()));
     projectRepo.save(project);
 }
 

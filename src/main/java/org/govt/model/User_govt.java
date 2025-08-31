@@ -24,7 +24,7 @@ public class User_govt implements UserDetails {
     private String email;
     private String govt_Id;
     private String govt_department;
-    private String pincode;
+    private Address address;
     private boolean approved;
 
 

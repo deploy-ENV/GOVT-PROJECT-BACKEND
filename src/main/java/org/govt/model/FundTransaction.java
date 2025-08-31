@@ -18,10 +18,10 @@ private String toUserId;
 private String fromRole;
 private String toRole;   
 private String projectId;
-private BigDecimal amount;
+private int amount;
 private String purpose;
 private String status; 
-private LocalDate timestamp;
+private String timestamp;
 
     
 }

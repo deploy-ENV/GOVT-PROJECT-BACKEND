@@ -23,7 +23,7 @@ public class DocumentUpload {
     private String fileType;
     private long fileSize;
 
-    private LocalDate uploadedAt;
+    private String uploadedAt;
     private String fileId; // GridFS file ID
 }
 
