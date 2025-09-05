@@ -42,7 +42,7 @@ private List<String> requiredMaterials;
 private List<String> estimatedQuantities;
 
 // Document Upload IDs (reference to DocumentUpload.entityId)
-private List<String> documentIds; // optional: store GridFS ref IDs if needed
+private List<String> documentIds; // store GridFS 
 
 // Bidding and Assignment
 private String assignedContractorId;
@@ -54,6 +54,7 @@ private boolean aiSupplierMatchEnabled = false;
 private ProjectStatus status; // DRAFT, BIDDING, ASSIGNED, IN_PROGRESS, COMPLETED, CLOSED
 private String comments;
 
+    private List<ProjectProgress> progressSteps;
 private String thumbnailUrl;
 
 }

@@ -11,18 +11,12 @@ import lombok.Data;
 @Data
 public class ProjectProgress {
   
-@Id
-private String id;
-private String projectId;
-private String submittedByUserId;
-private String role; // CONTRACTOR / SUPERVISOR
 
-private String updateText;
-private List<String> imageFileIds;  // GridFS file IDs
-private int progressPercent; // e.g., 40%
-
-private String submittedAt;
-private boolean verified;   // marked by supervisor
-private String verificationComment;
+ private String title;
+    private String description;
+    private String supervisorId;
+    private String status;   // NOT_STARTED, IN_PROGRESS, COMPLETED, LOCKED
+    private String dueDate;
+    private int order;   
 
 }
