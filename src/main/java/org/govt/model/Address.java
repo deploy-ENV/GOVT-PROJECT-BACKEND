@@ -1,0 +1,16 @@
+package org.govt.model;
+
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Data;
+
+@Data
+@Document("addresses")
+public class Address {
+    
+    private String street;
+    private String city;
+    private String state;
+    private String zipCode;
+    private String country;
+}
