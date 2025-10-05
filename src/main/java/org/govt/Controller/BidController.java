@@ -31,6 +31,10 @@ public ResponseEntity<Bid> submitBid(@RequestBody Bid bid) {
 public ResponseEntity<List<Bid>> getBidsForProject(@PathVariable String projectId) {
     return ResponseEntity.ok(bidService.getBidsForProject(projectId));
 }
+@GetMapping("/project/{contractorId}")
+public ResponseEntity<List<Bid>> getBidsContrea(@PathVariable String contractorId) {
+    return ResponseEntity.ok(bidService.getBidsForContractor(contractorId));
+}
 
 
 }

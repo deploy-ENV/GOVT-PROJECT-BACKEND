@@ -53,5 +53,9 @@ public List<Bid> getBidsForProject(String projectId) {
         return selectedBid;
     }
 
+    public List<Bid> getBidsForContractor(String contractorId) {
+        return bidRepository.findByContractorId(contractorId);
+    }
+
 
 }
