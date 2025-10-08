@@ -1,6 +1,7 @@
 package org.govt.service;
 
 import java.util.List;
+import java.util.Collections;
 
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Register;
@@ -47,19 +48,20 @@ public List<User_Supervisor> getSupervisorsByZone(String zone) {
         return user1!=null && password.matches(pass,user1.getPassword());
     }
 
-     public List<User_Supervisor> findNearestSupervisor( String zone2) {
-        List<User_Supervisor> supervisors = userSupervisorRepository.findByZone(zone2);
-        if (!supervisors.isEmpty()) {
-            return supervisors;
-        }
-        // If no supervisors found in the specified zone, return all supervisors
-        List<User_Supervisor> allSupervisors = userSupervisorRepository.findAll();
-        if (!allSupervisors.isEmpty()) {
-            return allSupervisors;
-        }
-        // If no supervisors exist at all, return null or an empty list based on your preference
-        return null;
-
+    public List<User_Supervisor> findNearestSupervisor(String pinCode) {
+    List<User_Supervisor> supervisors = userSupervisorRepository.findByAddress_ZipCode(pinCode);
+    if (!supervisors.isEmpty()) {
+        return supervisors;
     }
+
+    // If no supervisors found in the specified pin code, return all supervisors
+    List<User_Supervisor> allSupervisors = userSupervisorRepository.findAll();
+    if (!allSupervisors.isEmpty()) {
+        return allSupervisors;
+    }
+
+    // If no supervisors exist at all, return an empty list
+    return Collections.emptyList();
+}
 
 }

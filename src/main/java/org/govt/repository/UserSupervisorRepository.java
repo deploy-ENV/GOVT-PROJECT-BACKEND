@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface UserSupervisorRepository extends MongoRepository<User_Supervisor,String> {
     User_Supervisor findByUsername(String username);
     List<User_Supervisor> findByZone(String zone);
+    List<User_Supervisor> findByAddress_ZipCode(String zipCode);
 }
