@@ -1,8 +1,11 @@
 package org.govt.Controller;
 
+import java.util.List;
+
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Login;
 import org.govt.login_message.Register;
+import org.govt.model.Project;
 import org.govt.model.User_Supervisor;
 import org.govt.service.UserSupervisorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -47,5 +53,14 @@ private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
                 .body(new Login<>("Invalid Credentials!!!", "", null));
         }
     }
+    @GetMapping("/supervisors/getProject/{id}")
+    public List<Project> getProjectsBySupervisorId(@PathVariable String id) {
+        User_Supervisor supervisor = userSupervisorService.findByUsername(id);
+        if (supervisor != null) {
+            return userSupervisorService.getProjectsBySupervisorId(id);
+        }
+        return List.of(); // Return an empty list if supervisor not found
+    }
+    
     
 }

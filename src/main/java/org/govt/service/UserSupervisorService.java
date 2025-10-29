@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Register;
+import org.govt.model.Project;
 import org.govt.model.User_Supervisor;
 import org.govt.repository.UserSupervisorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class UserSupervisorService {
 
     @Autowired
     private JwtUtil jwt=new JwtUtil();
+    @Autowired
+    ProjectService projectService;
 
 
 public List<User_Supervisor> getSupervisorsByZone(String zone) {
@@ -63,5 +66,11 @@ public List<User_Supervisor> getSupervisorsByZone(String zone) {
     // If no supervisors exist at all, return an empty list
     return Collections.emptyList();
 }
+
+    public List<Project> getProjectsBySupervisorId(String id) {
+        return projectService.getProjectsBySupervisorId(id);
+     
+    }
+
 
 }

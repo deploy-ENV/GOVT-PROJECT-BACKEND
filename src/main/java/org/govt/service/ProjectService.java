@@ -2,8 +2,10 @@ package org.govt.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.govt.Enums.ProjectStatus;
+import org.govt.model.Address;
 import org.govt.model.Bid;
 import org.govt.model.Project;
 import org.govt.model.ProjectProgress;
@@ -12,6 +14,8 @@ import org.govt.repository.BidRepository;
 import org.govt.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.mongodb.Function;
 
 @Service
 public class ProjectService {
@@ -44,22 +48,19 @@ public List<Project> listMyProjects(String pmId) {
 public Project getById(String id) {
     return projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
 }
-public Project finalizeProjectAssignments(String projectId, String contractorId, String supervisorId) {
+public Project finalizeProjectAssignments(String projectId, String contractorId, String supervisorId, List<String> supplierId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
         // Contractor selection (via BidService)
         bidService.acceptContractorBid(projectId, contractorId);
 
-        // Auto-fetch suppliers
-        List<User_Supplier> matchedSuppliers = supplierService.autoFetchSuppliers(projectId);
-        List<String> supplierIds = matchedSuppliers.stream()
-                .map(User_Supplier::getId)
-                .toList();
+       
 
         // Update project
         project.setAssignedContractorId(contractorId);
         project.setAssignedSupervisorId(supervisorId);
+        List<String> supplierIds = supplierId;
         project.setAssignedSupplierIds(supplierIds);
         project.setStatus(ProjectStatus.IN_PROGRESS); // Execution mode
         return projectRepository.save(project);
@@ -110,5 +111,43 @@ public void deleteAllProjects() {
 public Project updateProject(Project updatedProject) {
     return projectRepository.save(updatedProject);
 }
+
+public List<Project> getProjectsBySupervisorId(String id) {
+    return projectRepository.findByAssignedSupervisorId(id);
+}
+
+
+public List<User_Supplier> findNearestSupplier(Address address) {
+    // Define search hierarchy (most specific → least specific)
+    List<Function<Address, Map<String, String>>> searchLevels = List.of(
+        // Street + ZipCode
+        addr -> Map.of("street", addr.getStreet(), "zipCode", addr.getZipCode()),
+        // City
+        addr -> Map.of("city", addr.getCity()),
+        // State
+        addr -> Map.of("state", addr.getState()),
+        // Country
+        addr -> Map.of("country", addr.getCountry())
+    );
+
+    for (Function<Address, Map<String, String>> extractor : searchLevels) {
+        Map<String, String> criteria = extractor.apply(address);
+
+        // Skip if any required field is null/blank
+        if (criteria.values().stream().anyMatch(v -> v == null || v.isBlank())) {
+            continue;
+        }
+
+        // Query suppliers dynamically
+        List<User_Supplier> suppliers = supplierService.findByCriteria(criteria);
+        if (!suppliers.isEmpty()) {
+            return suppliers;
+        }
+    }
+
+    // Fallback → all suppliers
+    return supplierService.getAllSuppliers();
+}
+
 
 }

@@ -3,6 +3,7 @@ package org.govt.Controller;
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Login;
 import org.govt.login_message.Register;
+import org.govt.model.Products;
 import org.govt.model.User_Supplier;
 import org.govt.service.UserSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,4 +48,33 @@ public class SupplierAuth {
                 .body(new Login<>("Invalid Credentials!!!", "", null));
         }
     }
+     @PostMapping("/{supplierId}/products")
+    public ResponseEntity<User_Supplier> addProduct(
+            @PathVariable String supplierId,
+            @RequestBody Products product) {
+        return ResponseEntity.ok(userSupplierService.addProduct(supplierId, product));
+    }
+
+    @DeleteMapping("/{supplierId}/products/{productId}")
+    public ResponseEntity<User_Supplier> deleteProduct(
+            @PathVariable String supplierId,
+            @PathVariable String productId) {
+        return ResponseEntity.ok(userSupplierService.deleteProduct(supplierId, productId));
+    }
+
+    @PatchMapping("/{supplierId}/products/{productId}/availability")
+    public ResponseEntity<User_Supplier> updateAvailability(
+            @PathVariable String supplierId,
+            @PathVariable String productId,
+            @RequestParam boolean available) {
+        return ResponseEntity.ok(userSupplierService.updateProductAvailability(supplierId, productId, available));
+    }
+        @PutMapping("/{supplierId}/products")
+    public ResponseEntity<User_Supplier> updateProduct(
+            @PathVariable String supplierId,
+            @RequestBody Products product) {
+        return ResponseEntity.ok(userSupplierService.updateProduct(supplierId, product));
+    }
+
+
 }

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.access.method.P;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,6 +27,8 @@ public class User_Supplier implements UserDetails {
     private String gst_number;
     private Address address;
 private List<String> materialsSupplied;
+private List<Products> catalogProducts;
+
     private boolean approved;
 
     public User_Supplier(String name, String username, String password, String DOB, long phone, String email, String gst_number, Address address){

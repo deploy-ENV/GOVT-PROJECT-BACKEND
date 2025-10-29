@@ -3,13 +3,18 @@ package org.govt.Controller;
 import java.util.List;
 
 import org.govt.Enums.ProjectStatus;
+import org.govt.model.Address;
 import org.govt.model.Project;
 import org.govt.model.User_Supervisor;
+import org.govt.model.User_Supplier;
 import org.govt.service.ProjectService;
 import org.govt.service.UserSupervisorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
+
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -50,15 +55,17 @@ public class ProjectController {
     }
 
   
-    @PostMapping("/{projectId}/finalize/contractor/{contractorId}/supervisor/{supervisorId}")
-    public ResponseEntity<Project> finalizeAssignments(
-            @PathVariable String projectId,
-            @PathVariable String contractorId,
-            @PathVariable String supervisorId) {
-        return ResponseEntity.ok(
-                projectService.finalizeProjectAssignments(projectId, contractorId, supervisorId)
-        );
-    }
+   @PostMapping("/{projectId}/finalize/contractor/{contractorId}/supervisor/{supervisorId}/suppliers")
+public ResponseEntity<Project> finalizeAssignments(
+        @PathVariable String projectId,
+        @PathVariable String contractorId,
+        @PathVariable String supervisorId,
+        @RequestBody List<String> supplierIds) {
+
+    return ResponseEntity.ok(
+            projectService.finalizeProjectAssignments(projectId, contractorId, supervisorId, supplierIds)
+    );
+}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable String id) {
         projectService.deleteProject(id);
@@ -106,5 +113,11 @@ public class ProjectController {
             @RequestParam(required = false) String zone) {
         return user_Supervisor.findNearestSupervisor( zone);
     }
+    @GetMapping("/suplier/nearest")
+    public List<User_Supplier> getNearestSupplier(
+            @RequestParam(required = false) Address address) {
+        return projectService.findNearestSupplier(address);
+    }
+    
 
 }
