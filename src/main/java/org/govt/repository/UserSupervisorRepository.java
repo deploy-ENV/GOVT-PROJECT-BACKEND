@@ -1,6 +1,7 @@
 package org.govt.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import org.govt.model.User_Supervisor;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,4 +12,5 @@ public interface UserSupervisorRepository extends MongoRepository<User_Superviso
     User_Supervisor findByUsername(String username);
     List<User_Supervisor> findByZone(String zone);
     List<User_Supervisor> findByAddress_ZipCode(String zipCode);
+    
 }

@@ -1,6 +1,7 @@
 package org.govt.service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -118,29 +119,62 @@ public List<Project> getProjectsBySupervisorId(String id) {
 
 
 public List<User_Supplier> findNearestSupplier(Address address) {
+    // Null check for safety
+    if (address == null) {
+        return supplierService.getAllSuppliers();
+    }
+
     // Define search hierarchy (most specific → least specific)
     List<Function<Address, Map<String, String>>> searchLevels = List.of(
         // Street + ZipCode
-        addr -> Map.of("street", addr.getStreet(), "zipCode", addr.getZipCode()),
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getStreet() != null && !addr.getStreet().isBlank()) {
+                map.put("street", addr.getStreet());
+            }
+            if (addr.getZipCode() != null && !addr.getZipCode().isBlank()) {
+                map.put("zipCode", addr.getZipCode());
+            }
+            return map;
+        },
         // City
-        addr -> Map.of("city", addr.getCity()),
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getCity() != null && !addr.getCity().isBlank()) {
+                map.put("city", addr.getCity());
+            }
+            return map;
+        },
         // State
-        addr -> Map.of("state", addr.getState()),
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getState() != null && !addr.getState().isBlank()) {
+                map.put("state", addr.getState());
+            }
+            return map;
+        },
         // Country
-        addr -> Map.of("country", addr.getCountry())
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getCountry() != null && !addr.getCountry().isBlank()) {
+                map.put("country", addr.getCountry());
+            }
+            return map;
+        }
     );
 
+    // Try each level of specificity
     for (Function<Address, Map<String, String>> extractor : searchLevels) {
         Map<String, String> criteria = extractor.apply(address);
 
-        // Skip if any required field is null/blank
-        if (criteria.values().stream().anyMatch(v -> v == null || v.isBlank())) {
+        // Skip empty criteria
+        if (criteria.isEmpty()) {
             continue;
         }
 
         // Query suppliers dynamically
         List<User_Supplier> suppliers = supplierService.findByCriteria(criteria);
-        if (!suppliers.isEmpty()) {
+        if (suppliers != null && !suppliers.isEmpty()) {
             return suppliers;
         }
     }
@@ -148,6 +182,4 @@ public List<User_Supplier> findNearestSupplier(Address address) {
     // Fallback → all suppliers
     return supplierService.getAllSuppliers();
 }
-
-
 }

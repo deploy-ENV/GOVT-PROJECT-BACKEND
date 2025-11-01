@@ -1,17 +1,27 @@
 package org.govt.service;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.mongodb.core.query.Query;
+
 import java.util.Collections;
+import java.util.HashMap;
 
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Register;
+import org.govt.model.Address;
 import org.govt.model.Project;
 import org.govt.model.User_Supervisor;
 import org.govt.repository.UserSupervisorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.function.Function;
 
 @Service
 public class UserSupervisorService {
@@ -22,6 +32,9 @@ public class UserSupervisorService {
     private JwtUtil jwt=new JwtUtil();
     @Autowired
     ProjectService projectService;
+    @Autowired
+private MongoTemplate mongoTemplate;
+
 
 
 public List<User_Supervisor> getSupervisorsByZone(String zone) {
@@ -51,21 +64,81 @@ public List<User_Supervisor> getSupervisorsByZone(String zone) {
         return user1!=null && password.matches(pass,user1.getPassword());
     }
 
-    public List<User_Supervisor> findNearestSupervisor(String pinCode) {
-    List<User_Supervisor> supervisors = userSupervisorRepository.findByAddress_ZipCode(pinCode);
-    if (!supervisors.isEmpty()) {
-        return supervisors;
+    public List<User_Supervisor> findNearestSupervisor(Address address) {
+    if (address == null) {
+        return getAllSupervisors(); // fallback if no address provided
     }
 
-    // If no supervisors found in the specified pin code, return all supervisors
-    List<User_Supervisor> allSupervisors = userSupervisorRepository.findAll();
-    if (!allSupervisors.isEmpty()) {
-        return allSupervisors;
+    // Define search hierarchy (most specific → least specific)
+    List<Function<Address, Map<String, String>>> searchLevels = List.of(
+        // Street + ZipCode
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getStreet() != null && !addr.getStreet().isBlank()) {
+                map.put("street", addr.getStreet());
+            }
+            if (addr.getZipCode() != null && !addr.getZipCode().isBlank()) {
+                map.put("zipCode", addr.getZipCode());
+            }
+            return map;
+        },
+        // City
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getCity() != null && !addr.getCity().isBlank()) {
+                map.put("city", addr.getCity());
+            }
+            return map;
+        },
+        // State
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getState() != null && !addr.getState().isBlank()) {
+                map.put("state", addr.getState());
+            }
+            return map;
+        },
+        // Country
+        addr -> {
+            Map<String, String> map = new HashMap<>();
+            if (addr.getCountry() != null && !addr.getCountry().isBlank()) {
+                map.put("country", addr.getCountry());
+            }
+            return map;
+        }
+    );
+
+    for (Function<Address, Map<String, String>> extractor : searchLevels) {
+        Map<String, String> criteria = extractor.apply(address);
+
+        if (criteria.isEmpty()) {
+            continue;
+        }
+
+        List<User_Supervisor> supervisors = findByCriteria(criteria);
+        if (supervisors != null && !supervisors.isEmpty()) {
+            return supervisors;
+        }
     }
 
-    // If no supervisors exist at all, return an empty list
-    return Collections.emptyList();
+    // Fallback → all supervisors
+    return getAllSupervisors();
 }
+    public List<User_Supervisor> findByCriteria(Map<String, String> criteria) {
+    Query query = new Query();
+
+    criteria.forEach((key, value) -> {
+        if (value != null && !value.isBlank()) {
+            query.addCriteria(Criteria.where("address." + key).is(value));
+        }
+    });
+
+    return mongoTemplate.find(query, User_Supervisor.class);
+}
+
+private List<User_Supervisor> getAllSupervisors() {
+    return userSupervisorRepository.findAll();
+    }
 
     public List<Project> getProjectsBySupervisorId(String id) {
         return projectService.getProjectsBySupervisorId(id);
