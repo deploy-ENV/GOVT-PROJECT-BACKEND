@@ -110,12 +110,12 @@ public ResponseEntity<Project> finalizeAssignments(
     }
      @GetMapping("/supervisors/nearest")
     public List<User_Supervisor> getNearestSupervisor(
-            @RequestParam(required = false) String zone) {
-        return user_Supervisor.findNearestSupervisor( zone);
+            @RequestBody Address address) {
+        return user_Supervisor.findNearestSupervisor( address);
     }
-    @GetMapping("/suplier/nearest")
+    @PostMapping("/suplier/nearest")
     public List<User_Supplier> getNearestSupplier(
-            @RequestParam(required = false) Address address) {
+           @RequestBody Address address) {
         return projectService.findNearestSupplier(address);
     }
     

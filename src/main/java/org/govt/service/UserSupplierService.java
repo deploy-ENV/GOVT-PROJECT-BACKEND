@@ -82,13 +82,18 @@ public List<User_Supplier> autoFetchSuppliers(String projectId) {
     public List<User_Supplier> getAllSuppliers() {
         return userSupplierRepository.findAll();
     }
-      public List<User_Supplier> findByCriteria(Map<String, String> criteria) {
-        Query query = new Query();
-        criteria.forEach((field, value) -> {
-            query.addCriteria(Criteria.where("address." + field).is(value));
-        });
-        return mongoTemplate.find(query, User_Supplier.class);
-    }
+     public List<User_Supplier> findByCriteria(Map<String, String> criteria) {
+    Query query = new Query();
+
+    criteria.forEach((key, value) -> {
+        if (value != null && !value.isBlank()) {
+            query.addCriteria(Criteria.where("address." + key).is(value));
+        }
+    });
+
+    return mongoTemplate.find(query, User_Supplier.class);
+}
+
 
       // Add product to supplier catalog
     public User_Supplier addProduct(String supplierId, Products product) {
