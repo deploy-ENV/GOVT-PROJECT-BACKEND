@@ -113,7 +113,7 @@ public ResponseEntity<Project> finalizeAssignments(
             @RequestBody Address address) {
         return user_Supervisor.findNearestSupervisor( address);
     }
-    @PostMapping("/suplier/nearest")
+    @GetMapping("/suplier/nearest")
     public List<User_Supplier> getNearestSupplier(
            @RequestBody Address address) {
         return projectService.findNearestSupplier(address);
