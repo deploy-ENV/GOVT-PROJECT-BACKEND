@@ -108,12 +108,12 @@ public ResponseEntity<Project> finalizeAssignments(
         Project savedProject = projectService.updateProject(updatedProject);
         return ResponseEntity.ok(savedProject);
     }
-     @GetMapping("/supervisors/nearest")
+     @PostMapping("/supervisors/nearest")
     public List<User_Supervisor> getNearestSupervisor(
             @RequestBody Address address) {
         return user_Supervisor.findNearestSupervisor( address);
     }
-    @GetMapping("/suplier/nearest")
+    @PostMapping("/suplier/nearest")
     public List<User_Supplier> getNearestSupplier(
            @RequestBody Address address) {
         return projectService.findNearestSupplier(address);
