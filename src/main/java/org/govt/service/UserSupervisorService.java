@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class UserSupervisorService {
@@ -66,7 +67,7 @@ public List<User_Supervisor> getSupervisorsByZone(String zone) {
 
     public List<User_Supervisor> findNearestSupervisor(Address address) {
     if (address == null) {
-        return getAllSupervisors(); // fallback if no address provided
+        return getAvailableSupervisors(getAllSupervisors()); // fallback if no address provided
     }
 
     // Define search hierarchy (most specific → least specific)
@@ -116,14 +117,23 @@ public List<User_Supervisor> getSupervisorsByZone(String zone) {
         }
 
         List<User_Supervisor> supervisors = findByCriteria(criteria);
-        if (supervisors != null && !supervisors.isEmpty()) {
-            return supervisors;
+        List<User_Supervisor> available = getAvailableSupervisors(supervisors);
+
+        if (!available.isEmpty()) {
+            return available;
         }
     }
 
-    // Fallback → all supervisors
-    return getAllSupervisors();
+    // Fallback → all available supervisors
+    return getAvailableSupervisors(getAllSupervisors());
 }
+
+private List<User_Supervisor> getAvailableSupervisors(List<User_Supervisor> supervisors) {
+    return supervisors.stream()
+        .filter(s -> s.getConnected() == null || s.getConnected().length < 3)
+        .collect(Collectors.toList());
+}
+
     public List<User_Supervisor> findByCriteria(Map<String, String> criteria) {
     Query query = new Query();
 
