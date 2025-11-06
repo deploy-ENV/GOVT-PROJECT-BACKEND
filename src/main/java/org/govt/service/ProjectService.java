@@ -119,14 +119,11 @@ public List<Project> getProjectsBySupervisorId(String id) {
 
 
 public List<User_Supplier> findNearestSupplier(Address address) {
-    // Null check for safety
     if (address == null) {
         return supplierService.getAllSuppliers();
     }
 
-    // Define search hierarchy (most specific → least specific)
     List<Function<Address, Map<String, String>>> searchLevels = List.of(
-        // Street + ZipCode
         addr -> {
             Map<String, String> map = new HashMap<>();
             if (addr.getStreet() != null && !addr.getStreet().isBlank()) {
@@ -137,7 +134,6 @@ public List<User_Supplier> findNearestSupplier(Address address) {
             }
             return map;
         },
-        // City
         addr -> {
             Map<String, String> map = new HashMap<>();
             if (addr.getCity() != null && !addr.getCity().isBlank()) {
@@ -145,7 +141,6 @@ public List<User_Supplier> findNearestSupplier(Address address) {
             }
             return map;
         },
-        // State
         addr -> {
             Map<String, String> map = new HashMap<>();
             if (addr.getState() != null && !addr.getState().isBlank()) {
@@ -153,7 +148,6 @@ public List<User_Supplier> findNearestSupplier(Address address) {
             }
             return map;
         },
-        // Country
         addr -> {
             Map<String, String> map = new HashMap<>();
             if (addr.getCountry() != null && !addr.getCountry().isBlank()) {
@@ -163,23 +157,16 @@ public List<User_Supplier> findNearestSupplier(Address address) {
         }
     );
 
-    // Try each level of specificity
     for (Function<Address, Map<String, String>> extractor : searchLevels) {
         Map<String, String> criteria = extractor.apply(address);
+        if (criteria.isEmpty()) continue;
 
-        // Skip empty criteria
-        if (criteria.isEmpty()) {
-            continue;
-        }
-
-        // Query suppliers dynamically
         List<User_Supplier> suppliers = supplierService.findByCriteria(criteria);
         if (suppliers != null && !suppliers.isEmpty()) {
             return suppliers;
         }
     }
 
-    // Fallback → all suppliers
     return supplierService.getAllSuppliers();
 }
 }

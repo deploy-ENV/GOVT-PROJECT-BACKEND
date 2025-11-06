@@ -30,6 +30,7 @@ private List<String> materialsSupplied;
 private List<Products> catalogProducts;
 
     private boolean approved;
+    private long createdAt = System.currentTimeMillis();
 
     public User_Supplier(String name, String username, String password, String DOB, long phone, String email, String gst_number, Address address){
         this.name=name;

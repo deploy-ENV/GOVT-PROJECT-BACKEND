@@ -13,6 +13,7 @@ import org.govt.login_message.Register;
 import org.govt.model.Address;
 import org.govt.model.Project;
 import org.govt.model.User_Supervisor;
+import org.govt.model.User_Supplier;
 import org.govt.repository.UserSupervisorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -154,6 +155,8 @@ private List<User_Supervisor> getAllSupervisors() {
         return projectService.getProjectsBySupervisorId(id);
      
     }
+
+ 
 
 
 }
