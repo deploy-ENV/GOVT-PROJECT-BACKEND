@@ -118,11 +118,7 @@ public ResponseEntity<Project> finalizeAssignments(
            @RequestBody Address address) {
         return projectService.findNearestSupplier(address);
     }
-    @GetMapping("/suppliers/unassigned/{projectId}")
-public ResponseEntity<List<User_Supplier>> getUnassignedSuppliers(@PathVariable String projectId) {
-    List<User_Supplier> unassigned = user_Supervisor.getUnassignedSuppliersForProject(projectId);
-    return ResponseEntity.ok(unassigned);
-}
+  
     
 
 }
