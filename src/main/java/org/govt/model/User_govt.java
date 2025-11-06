@@ -26,6 +26,7 @@ public class User_govt implements UserDetails {
     private String govt_department;
     private Address address;
     private boolean approved;
+    private long createdAt = System.currentTimeMillis();
 
 
     /**

@@ -27,6 +27,7 @@ public class User_contractor implements UserDetails {
     private String gst_number;
     private  Address address;
     private boolean approved;
+    private long createdAt = System.currentTimeMillis();
     
 
 

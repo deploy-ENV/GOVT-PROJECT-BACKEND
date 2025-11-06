@@ -24,28 +24,27 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserSupplierService {
+
     @Autowired
     private UserSupplierRepository userSupplierRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
-
     @Autowired
     private  PasswordEncoder password;
     @Autowired
     private ProjectRepository projectRepo;
     @Autowired
     private UserSupplierRepository supplierRepo;
-
     @Autowired
     JwtUtil jwt =new JwtUtil();
-public List<User_Supplier> autoFetchSuppliers(String projectId) {
-    Project project = projectRepo.findById(projectId).orElseThrow();
 
-    // Simple example: match by pincode (zone)
-    String zone = project.getLocation().getZipCode();
-    return supplierRepo.findByAddress(project.getLocation());
-    
-}
+    public List<User_Supplier> autoFetchSuppliers(String projectId) {
+        Project project = projectRepo.findById(projectId).orElseThrow();
+        String zone = project.getLocation().getZipCode();
+        return supplierRepo.findByAddress(project.getLocation());
+        
+    }
+
     public Register registerSupplier(User_Supplier userSupplier){
         if(findByUsername(userSupplier.getUsername())!=null){
             return new Register("User Already Exists!!","");
@@ -54,6 +53,7 @@ public List<User_Supplier> autoFetchSuppliers(String projectId) {
         userSupplierRepository.save(userSupplier);
         return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()));
     }
+
     public User_Supplier findByUsername(String username) {
         return userSupplierRepository.findByUsername(username);
     }
@@ -63,7 +63,8 @@ public List<User_Supplier> autoFetchSuppliers(String projectId) {
         User_Supplier supplier= userSupplierRepository.findByUsername(username);
         return supplier!=null && password.matches(password1,supplier.getPassword());
     }
-     public List<User_Supplier> findByStreetAndZipCode(String street, String zipCode) {
+
+    public List<User_Supplier> findByStreetAndZipCode(String street, String zipCode) {
         return userSupplierRepository.findByAddress_StreetAndAddress_ZipCode(street, zipCode);
     }
 
@@ -82,20 +83,20 @@ public List<User_Supplier> autoFetchSuppliers(String projectId) {
     public List<User_Supplier> getAllSuppliers() {
         return userSupplierRepository.findAll();
     }
-     public List<User_Supplier> findByCriteria(Map<String, String> criteria) {
-    Query query = new Query();
+    public List<User_Supplier> findByCriteria(Map<String, String> criteria) {
+        Query query = new Query();
 
-    criteria.forEach((key, value) -> {
-        if (value != null && !value.isBlank()) {
-            query.addCriteria(Criteria.where("address." + key).is(value));
-        }
-    });
+        criteria.forEach((key, value) -> {
+            if (value != null && !value.isBlank()) {
+                query.addCriteria(Criteria.where("address." + key).is(value));
+            }
+        });
 
-    return mongoTemplate.find(query, User_Supplier.class);
-}
+        return mongoTemplate.find(query, User_Supplier.class);
+    }
 
 
-      // Add product to supplier catalog
+    // Add product to supplier catalog
     public User_Supplier addProduct(String supplierId, Products product) {
         User_Supplier supplier = userSupplierRepository.findById(supplierId)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));

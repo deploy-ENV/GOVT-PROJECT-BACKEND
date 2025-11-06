@@ -27,6 +27,8 @@ public class User_ProjectManager implements UserDetails {
     private Address address;
     private boolean approved;
     private String[] connected;
+    private long createdAt = System.currentTimeMillis();
+
 
     public User_ProjectManager(String name, String username, String password, String DOB, String email, String gst_number, Address address){
         this.name=name;
