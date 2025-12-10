@@ -23,11 +23,11 @@ public class UserProjectManagerService {
 
     public Register registerProjectManager(User_ProjectManager user_projectManager){
         if(findByUsername(user_projectManager.getUsername())!=null){
-            return new Register("User Already Exists!!!!","");
+            return new Register("User Already Exists!!!!", jwt.generateToken(user_projectManager.getUsername()),findByUsername(user_projectManager.getUsername()));
         }
         user_projectManager.setPassword(password.encode(user_projectManager.getPassword()));
         userProjectManagerRepository.save(user_projectManager);
-        return new Register("Registered Successfully!!!", jwt.generateToken(user_projectManager.getUsername()));
+        return new Register("Registered Successfully!!!", jwt.generateToken(user_projectManager.getUsername()),findByUsername(user_projectManager.getUsername()));
     }
 public User_ProjectManager findByUsername(String username) {
         return userProjectManagerRepository.findByUsername(username);

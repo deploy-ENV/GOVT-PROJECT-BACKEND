@@ -1,15 +1,16 @@
 package org.govt.login_message;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Register {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Register<T> {
     String message;
     String token;
-    public Register(String message,String token){
-        this.message=message;
-        this.token=token;
-    }
+    private T data;  
 }

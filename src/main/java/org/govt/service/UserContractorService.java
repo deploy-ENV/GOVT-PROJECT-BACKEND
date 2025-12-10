@@ -21,12 +21,12 @@ public class UserContractorService {
 
     public Register registerContractor(User_contractor userContractor) {
         if (findByUsername(userContractor.getUsername()) != null) {
-            return new Register("User  already exists!!", "");
+            return new Register("User  already exists!!", jwt.generateToken(userContractor.getUsername()),findByUsername(userContractor.getUsername()));
         }
 
         userContractor.setPassword(passwordEncoder.encode(userContractor.getPassword()));
         userRepository.save(userContractor);
-        return new Register("Registered successfully!!!", jwt.generateToken(userContractor.getUsername()));
+        return new Register("Registered successfully!!!", jwt.generateToken(userContractor.getUsername()),findByUsername(userContractor.getUsername()));
     }
     public User_contractor findByUsername(String username) {
         return userRepository.findByUsername(username);
