@@ -47,11 +47,11 @@ public class UserSupplierService {
 
     public Register registerSupplier(User_Supplier userSupplier){
         if(findByUsername(userSupplier.getUsername())!=null){
-            return new Register("User Already Exists!!","");
+            return new Register("User Already Exists!!",jwt.generateToken(userSupplier.getUsername()),findByUsername(userSupplier.getUsername()));
         }
         userSupplier.setPassword(password.encode(userSupplier.getPassword()));
         userSupplierRepository.save(userSupplier);
-        return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()));
+        return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()),findByUsername(userSupplier.getUsername()));
     }
 
     public User_Supplier findByUsername(String username) {

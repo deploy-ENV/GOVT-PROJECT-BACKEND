@@ -7,16 +7,22 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
-  @Document("project_progress")
+ @Document("project_progress")
 @Data
 public class ProjectProgress {
-  
 
- private String title;
+    private String id;
+    private String title;
     private String description;
-    private String supervisorId;
-    private String status;   // NOT_STARTED, IN_PROGRESS, COMPLETED, LOCKED
-    private String dueDate;
-    private int order;   
 
+    private String supervisorId;
+
+    // NOT_STARTED, IN_PROGRESS, COMPLETED, LOCKED
+    private String status;     
+
+    private LocalDate dueDate;
+    private LocalDate startedAt;
+    private LocalDate completedAt;
+
+    private int order;
 }
