@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -25,11 +26,10 @@ public class User_contractor implements UserDetails {
     private long phone;
     private String email;
     private String gst_number;
-    private  Address address;
+    private Address address;
     private boolean approved;
+    private ArrayList<String> connected;
     private long createdAt = System.currentTimeMillis();
-    
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

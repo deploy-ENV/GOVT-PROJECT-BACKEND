@@ -31,132 +31,136 @@ public class UserSupervisorService {
     private final PasswordEncoder password;
 
     @Autowired
-    private JwtUtil jwt=new JwtUtil();
+    private JwtUtil jwt = new JwtUtil();
     @Autowired
     ProjectService projectService;
     @Autowired
-private MongoTemplate mongoTemplate;
+    private MongoTemplate mongoTemplate;
 
-
-
-public List<User_Supervisor> getSupervisorsByZone(String zone) {
-    return userSupervisorRepository.findByZone(zone);
-}
-
-    public UserSupervisorService(UserSupervisorRepository user){
-        this.userSupervisorRepository =user;
-        this.password=new BCryptPasswordEncoder();
+    public List<User_Supervisor> getSupervisorsByZone(String zone) {
+        return userSupervisorRepository.findByZone(zone);
     }
 
-    public Register registerSupervisor(User_Supervisor user_supervisor){
-        if(findByUsername(user_supervisor.getUsername())!=null){
-            return new Register("User Already Exists!!!!",jwt.generateToken(user_supervisor.getUsername()),findByUsername(user_supervisor.getUsername()));
+    public UserSupervisorService(UserSupervisorRepository user) {
+        this.userSupervisorRepository = user;
+        this.password = new BCryptPasswordEncoder();
+    }
+
+    public Register registerSupervisor(User_Supervisor user_supervisor) {
+        if (findByUsername(user_supervisor.getUsername()) != null) {
+            return new Register("User Already Exists!!!!", jwt.generateToken(user_supervisor.getUsername()),
+                    findByUsername(user_supervisor.getUsername()));
         }
 
         user_supervisor.setPassword(password.encode(user_supervisor.getPassword()));
-        User_Supervisor uSupervisor=userSupervisorRepository.save(user_supervisor);
-        return new Register("Registered Successfully!!!", jwt.generateToken(user_supervisor.getUsername()),uSupervisor);
+        User_Supervisor uSupervisor = userSupervisorRepository.save(user_supervisor);
+        return new Register("Registered Successfully!!!", jwt.generateToken(user_supervisor.getUsername()),
+                uSupervisor);
     }
+
     public User_Supervisor findByUsername(String username) {
         return userSupervisorRepository.findByUsername(username);
     }
 
-    public boolean authenticateSupervisor(String username,String pass){
-        User_Supervisor user1= userSupervisorRepository.findByUsername(username);
-        return user1!=null && password.matches(pass,user1.getPassword());
+    public boolean authenticateSupervisor(String username, String pass) {
+        User_Supervisor user1 = userSupervisorRepository.findByUsername(username);
+        return user1 != null && password.matches(pass, user1.getPassword());
     }
 
     public List<User_Supervisor> findNearestSupervisor(Address address) {
-    if (address == null) {
-        return getAvailableSupervisors(getAllSupervisors()); // fallback if no address provided
+        if (address == null) {
+            return getAvailableSupervisors(getAllSupervisors()); // fallback if no address provided
+        }
+
+        // Define search hierarchy (most specific → least specific)
+        List<Function<Address, Map<String, String>>> searchLevels = List.of(
+                // Street + ZipCode
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getStreet() != null && !addr.getStreet().isBlank()) {
+                        map.put("street", addr.getStreet());
+                    }
+                    if (addr.getZipCode() != null && !addr.getZipCode().isBlank()) {
+                        map.put("zipCode", addr.getZipCode());
+                    }
+                    return map;
+                },
+                // City
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getCity() != null && !addr.getCity().isBlank()) {
+                        map.put("city", addr.getCity());
+                    }
+                    return map;
+                },
+                // State
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getState() != null && !addr.getState().isBlank()) {
+                        map.put("state", addr.getState());
+                    }
+                    return map;
+                },
+                // Country
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getCountry() != null && !addr.getCountry().isBlank()) {
+                        map.put("country", addr.getCountry());
+                    }
+                    return map;
+                });
+
+        for (Function<Address, Map<String, String>> extractor : searchLevels) {
+            Map<String, String> criteria = extractor.apply(address);
+
+            if (criteria.isEmpty()) {
+                continue;
+            }
+
+            List<User_Supervisor> supervisors = findByCriteria(criteria);
+            List<User_Supervisor> available = getAvailableSupervisors(supervisors);
+
+            if (!available.isEmpty()) {
+                return available;
+            }
+        }
+
+        // Fallback → all available supervisors
+        return getAvailableSupervisors(getAllSupervisors());
     }
 
-    // Define search hierarchy (most specific → least specific)
-    List<Function<Address, Map<String, String>>> searchLevels = List.of(
-        // Street + ZipCode
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getStreet() != null && !addr.getStreet().isBlank()) {
-                map.put("street", addr.getStreet());
-            }
-            if (addr.getZipCode() != null && !addr.getZipCode().isBlank()) {
-                map.put("zipCode", addr.getZipCode());
-            }
-            return map;
-        },
-        // City
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getCity() != null && !addr.getCity().isBlank()) {
-                map.put("city", addr.getCity());
-            }
-            return map;
-        },
-        // State
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getState() != null && !addr.getState().isBlank()) {
-                map.put("state", addr.getState());
-            }
-            return map;
-        },
-        // Country
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getCountry() != null && !addr.getCountry().isBlank()) {
-                map.put("country", addr.getCountry());
-            }
-            return map;
-        }
-    );
-
-    for (Function<Address, Map<String, String>> extractor : searchLevels) {
-        Map<String, String> criteria = extractor.apply(address);
-
-        if (criteria.isEmpty()) {
-            continue;
-        }
-
-        List<User_Supervisor> supervisors = findByCriteria(criteria);
-        List<User_Supervisor> available = getAvailableSupervisors(supervisors);
-
-        if (!available.isEmpty()) {
-            return available;
-        }
+    private List<User_Supervisor> getAvailableSupervisors(List<User_Supervisor> supervisors) {
+        return supervisors.stream()
+                .filter(s -> s.getConnected() == null || s.getConnected().size() < 3)
+                .collect(Collectors.toList());
     }
-
-    // Fallback → all available supervisors
-    return getAvailableSupervisors(getAllSupervisors());
-}
-
-private List<User_Supervisor> getAvailableSupervisors(List<User_Supervisor> supervisors) {
-    return supervisors.stream()
-        .filter(s -> s.getConnected() == null || s.getConnected().length < 3)
-        .collect(Collectors.toList());
-}
 
     public List<User_Supervisor> findByCriteria(Map<String, String> criteria) {
-    Query query = new Query();
+        Query query = new Query();
 
-    criteria.forEach((key, value) -> {
-        if (value != null && !value.isBlank()) {
-            query.addCriteria(Criteria.where("address." + key).is(value));
-        }
-    });
+        criteria.forEach((key, value) -> {
+            if (value != null && !value.isBlank()) {
+                query.addCriteria(Criteria.where("address." + key).is(value));
+            }
+        });
 
-    return mongoTemplate.find(query, User_Supervisor.class);
-}
+        return mongoTemplate.find(query, User_Supervisor.class);
+    }
 
-private List<User_Supervisor> getAllSupervisors() {
-    return userSupervisorRepository.findAll();
+    private List<User_Supervisor> getAllSupervisors() {
+        return userSupervisorRepository.findAll();
     }
 
     public List<Project> getProjectsBySupervisorId(String id) {
         return projectService.getProjectsBySupervisorId(id);
-     
+
     }
 
- 
+    public User_Supervisor getById(String id) {
+        return userSupervisorRepository.findById(id).get();
+    }
 
-
+    public void updateUserSupervisor(User_Supervisor userSupervisor) {
+        userSupervisorRepository.save(userSupervisor);
+    }
 }
