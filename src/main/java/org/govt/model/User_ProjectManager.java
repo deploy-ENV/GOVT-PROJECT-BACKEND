@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,20 +27,20 @@ public class User_ProjectManager implements UserDetails {
     private String gst_number;
     private Address address;
     private boolean approved;
-    private String[] connected;
+    private ArrayList<String> connected;
     private long createdAt = System.currentTimeMillis();
 
-
-    public User_ProjectManager(String name, String username, String password, String DOB, String email, String gst_number, Address address){
-        this.name=name;
-        this.username=username;
-        this.password=password;
-        this.DOB=DOB;
-        this.phone=phone;
-        this.email=email;
-        this.gst_number=gst_number;
-        this.address=address;
-        this.approved=false;
+    public User_ProjectManager(String name, String username, String password, String DOB, String email,
+            String gst_number, Address address) {
+        this.name = name;
+        this.username = username;
+        this.password = password;
+        this.DOB = DOB;
+        this.phone = phone;
+        this.email = email;
+        this.gst_number = gst_number;
+        this.address = address;
+        this.approved = false;
     }
 
     @Override

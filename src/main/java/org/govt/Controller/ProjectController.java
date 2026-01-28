@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 
-
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/projects")
@@ -26,21 +25,20 @@ public class ProjectController {
     @Autowired
     private UserSupervisorService user_Supervisor;
 
-
     @PostMapping("/pm/{pmId}/dept/{departmentId}/name/{pmName}")
     public ResponseEntity<Project> createProject(@RequestBody Project project,
-                                                 @PathVariable String pmId,
-                                                 @PathVariable String departmentId,
-                                                 @PathVariable String pmName) {
+            @PathVariable String pmId,
+            @PathVariable String departmentId,
+            @PathVariable String pmName) {
         Project saved = projectService.createProject(project, pmId, departmentId, pmName);
         return ResponseEntity.ok(saved);
     }
+
     @GetMapping("/all")
     public ResponseEntity<List<Project>> getAllProjects() {
         List<Project> projects = projectService.listAllProjects();
         return ResponseEntity.ok(projects);
     }
-
 
     @GetMapping("/pm/{pmId}")
     public ResponseEntity<List<Project>> getMyProjects(@PathVariable String pmId) {
@@ -48,45 +46,47 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Project> getById(@PathVariable String id) {
         return ResponseEntity.ok(projectService.getById(id));
     }
 
-  
-   @PostMapping("/{projectId}/finalize/contractor/{contractorId}/supervisor/{supervisorId}/suppliers")
-public ResponseEntity<Project> finalizeAssignments(
-        @PathVariable String projectId,
-        @PathVariable String contractorId,
-        @PathVariable String supervisorId,
-        @RequestBody List<String> supplierIds) {
+    @PostMapping("/{projectId}/finalize/contractor/{contractorId}/supervisor/{supervisorId}/suppliers")
+    public ResponseEntity<Project> finalizeAssignments(
+            @PathVariable String projectId,
+            @PathVariable String contractorId,
+            @PathVariable String supervisorId,
+            @RequestBody List<String> supplierIds) {
 
-    return ResponseEntity.ok(
-            projectService.finalizeProjectAssignments(projectId, contractorId, supervisorId, supplierIds)
-    );
-}
+        return ResponseEntity.ok(
+                projectService.finalizeProjectAssignments(projectId, contractorId, supervisorId, supplierIds));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable String id) {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
     }
+
     @DeleteMapping("/all")
     public ResponseEntity<Void> deleteAllProjects() {
         projectService.deleteAllProjects();
         return ResponseEntity.noContent().build();
     }
+
     @PutMapping("/{id}/status/{status}/{index}")
-    public ResponseEntity<Project> updateProjectStatus(@PathVariable String id, @PathVariable String status, @PathVariable int index) {
+    public ResponseEntity<Project> updateProjectStatus(@PathVariable String id, @PathVariable String status,
+            @PathVariable int index) {
         Project project = projectService.getById(id);
-        
+
         Project updatedProject = projectService.updateProjectProgress(id, index, status);
         return ResponseEntity.ok(updatedProject);
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<Project> updateProject(@PathVariable String id, @RequestBody Project updatedProject) {
         Project existingProject = projectService.getById(id);
-        
+
         // Update fields
         existingProject.setTitle(updatedProject.getTitle());
         existingProject.setDescription(updatedProject.getDescription());
@@ -104,21 +104,21 @@ public ResponseEntity<Project> finalizeAssignments(
         existingProject.setAiSupplierMatchEnabled(updatedProject.isAiSupplierMatchEnabled());
         existingProject.setComments(updatedProject.getComments());
         existingProject.setThumbnailUrl(updatedProject.getThumbnailUrl());
-        
+
         Project savedProject = projectService.updateProject(updatedProject);
         return ResponseEntity.ok(savedProject);
     }
-     @PostMapping("/supervisors/nearest")
+
+    @PostMapping("/supervisors/nearest")
     public List<User_Supervisor> getNearestSupervisor(
             @RequestBody Address address) {
-        return user_Supervisor.findNearestSupervisor( address);
+        return user_Supervisor.findNearestSupervisor(address);
     }
+
     @PostMapping("/suplier/nearest")
     public List<User_Supplier> getNearestSupplier(
-           @RequestBody Address address) {
+            @RequestBody Address address) {
         return projectService.findNearestSupplier(address);
     }
-  
-    
 
 }

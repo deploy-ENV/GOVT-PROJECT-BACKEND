@@ -8,6 +8,7 @@ import org.springframework.security.access.method.P;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,23 +27,26 @@ public class User_Supplier implements UserDetails {
     private String email;
     private String gst_number;
     private Address address;
-private List<String> materialsSupplied;
-private List<Products> catalogProducts;
+    private List<String> materialsSupplied;
+    private List<Products> catalogProducts;
+    private ArrayList<String> connected;
 
     private boolean approved;
     private long createdAt = System.currentTimeMillis();
 
-    public User_Supplier(String name, String username, String password, String DOB, long phone, String email, String gst_number, Address address){
-        this.name=name;
-        this.username=username;
-        this.password=password;
-        this.DOB=DOB;
-        this.phone=phone;
-        this.email=email;
-        this.gst_number=gst_number;
-        this.address=address;
-        this.approved=false;
+    public User_Supplier(String name, String username, String password, String DOB, long phone, String email,
+            String gst_number, Address address) {
+        this.name = name;
+        this.username = username;
+        this.password = password;
+        this.DOB = DOB;
+        this.phone = phone;
+        this.email = email;
+        this.gst_number = gst_number;
+        this.address = address;
+        this.approved = false;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

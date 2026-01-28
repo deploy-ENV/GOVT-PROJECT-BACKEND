@@ -10,7 +10,9 @@ import org.govt.model.Address;
 import org.govt.model.Bid;
 import org.govt.model.Project;
 import org.govt.model.ProjectProgress;
+import org.govt.model.User_Supervisor;
 import org.govt.model.User_Supplier;
+import org.govt.model.User_contractor;
 import org.govt.repository.BidRepository;
 import org.govt.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,153 +22,162 @@ import com.mongodb.Function;
 
 @Service
 public class ProjectService {
-  @Autowired
-private ProjectRepository projectRepository;
-@Autowired
-private BidRepository bidRepository;
-@Autowired
-private UserSupplierService supplierService; 
-@Autowired
-private BidService bidService;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private BidRepository bidRepository;
+    @Autowired
+    private UserSupplierService supplierService;
+    @Autowired
+    private BidService bidService;
+    @Autowired
+    private UserSupervisorService user_SupervisorService;
+    @Autowired
+    private UserContractorService user_ContractorService;
 
-// Create a new project
-public Project createProject(Project project, String pmId, String departmentId, String pmName) {
-    project.setProjectManagerId(pmId);
-    project.setDepartmentId(departmentId);
-    project.setCreatedByName(pmName);
-    project.setCreatedAt(LocalDate.now().toString());
-    project.setStatus(ProjectStatus.BIDDING); // default to BIDDING when created
+    // Create a new project
+    public Project createProject(Project project, String pmId, String departmentId, String pmName) {
+        project.setProjectManagerId(pmId);
+        project.setDepartmentId(departmentId);
+        project.setCreatedByName(pmName);
+        project.setCreatedAt(LocalDate.now().toString());
+        project.setStatus(ProjectStatus.BIDDING); // default to BIDDING when created
 
-    return projectRepository.save(project);
-}
+        return projectRepository.save(project);
+    }
 
-// Get all projects posted by this PM
-public List<Project> listMyProjects(String pmId) {
-    return projectRepository.findByProjectManagerId(pmId);
-}
+    // Get all projects posted by this PM
+    public List<Project> listMyProjects(String pmId) {
+        return projectRepository.findByProjectManagerId(pmId);
+    }
 
-// (Optional) Get a single project by ID
-public Project getById(String id) {
-    return projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
-}
-public Project finalizeProjectAssignments(String projectId, String contractorId, String supervisorId, List<String> supplierId) {
+    // (Optional) Get a single project by ID
+    public Project getById(String id) {
+        return projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+    }
+
+    public Project finalizeProjectAssignments(String projectId, String contractorId, String supervisorId,
+            List<String> supplierId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
         // Contractor selection (via BidService)
         bidService.acceptContractorBid(projectId, contractorId);
-
-       
+        User_Supervisor user_Supervisor = user_SupervisorService.getById(supervisorId);
+        User_contractor user_Contractor = user_ContractorService.getById(contractorId);
 
         // Update project
         project.setAssignedContractorId(contractorId);
+        user_Contractor.getConnected().add(projectId);
+        user_ContractorService.updateUserContractor(user_Contractor);
         project.setAssignedSupervisorId(supervisorId);
+        user_Supervisor.getConnected().add(projectId);
+        user_SupervisorService.updateUserSupervisor(user_Supervisor);
         List<String> supplierIds = supplierId;
         project.setAssignedSupplierIds(supplierIds);
         project.setStatus(ProjectStatus.IN_PROGRESS); // Execution mode
         return projectRepository.save(project);
     }
 
-// Update project progress status sequentially
-public Project updateProjectProgress(String projectId, int stepIndex, String status) {
-    Project project = projectRepository.findById(projectId)
-                          .orElseThrow(() -> new RuntimeException("Project not found"));
+    // Update project progress status sequentially
+    public Project updateProjectProgress(String projectId, int stepIndex, String status) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
 
-    List<ProjectProgress> steps = project.getProgressSteps();
+        List<ProjectProgress> steps = project.getProgressSteps();
 
-    if (stepIndex < 0 || stepIndex >= steps.size()) {
-        throw new RuntimeException("Invalid progress step index");
-    }
-
-    ProjectProgress current = steps.get(stepIndex);
-
-    if ("LOCKED".equals(current.getStatus())) {
-        throw new RuntimeException("This progress step is locked until the previous one is completed.");
-    }
-
-    current.setStatus(status);
-
-    // Unlock the next step if this one is completed
-    if ("COMPLETED".equals(status) && stepIndex + 1 < steps.size()) {
-        ProjectProgress next = steps.get(stepIndex + 1);
-        if ("LOCKED".equals(next.getStatus())) {
-            next.setStatus("NOT_STARTED");
+        if (stepIndex < 0 || stepIndex >= steps.size()) {
+            throw new RuntimeException("Invalid progress step index");
         }
+
+        ProjectProgress current = steps.get(stepIndex);
+
+        if ("LOCKED".equals(current.getStatus())) {
+            throw new RuntimeException("This progress step is locked until the previous one is completed.");
+        }
+
+        current.setStatus(status);
+
+        // Unlock the next step if this one is completed
+        if ("COMPLETED".equals(status) && stepIndex + 1 < steps.size()) {
+            ProjectProgress next = steps.get(stepIndex + 1);
+            if ("LOCKED".equals(next.getStatus())) {
+                next.setStatus("NOT_STARTED");
+            }
+        }
+
+        return projectRepository.save(project);
     }
 
-    return projectRepository.save(project);
-}
+    public List<Project> listAllProjects() {
+        return projectRepository.findAll();
+    }
 
-public List<Project> listAllProjects() {
-    return projectRepository.findAll();
-}
+    public void deleteProject(String id) {
+        projectRepository.deleteById(id);
+    }
 
-public void deleteProject(String id) {
-    projectRepository.deleteById(id);
-}
+    public void deleteAllProjects() {
+        projectRepository.deleteAll();
+    }
 
-public void deleteAllProjects() {
-    projectRepository.deleteAll();
-}
+    public Project updateProject(Project updatedProject) {
+        return projectRepository.save(updatedProject);
+    }
 
-public Project updateProject(Project updatedProject) {
-    return projectRepository.save(updatedProject);
-}
+    public List<Project> getProjectsBySupervisorId(String id) {
+        return projectRepository.findByAssignedSupervisorId(id);
+    }
 
-public List<Project> getProjectsBySupervisorId(String id) {
-    return projectRepository.findByAssignedSupervisorId(id);
-}
+    public List<User_Supplier> findNearestSupplier(Address address) {
+        if (address == null) {
+            return supplierService.getAllSuppliers();
+        }
 
+        List<Function<Address, Map<String, String>>> searchLevels = List.of(
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getStreet() != null && !addr.getStreet().isBlank()) {
+                        map.put("street", addr.getStreet());
+                    }
+                    if (addr.getZipCode() != null && !addr.getZipCode().isBlank()) {
+                        map.put("zipCode", addr.getZipCode());
+                    }
+                    return map;
+                },
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getCity() != null && !addr.getCity().isBlank()) {
+                        map.put("city", addr.getCity());
+                    }
+                    return map;
+                },
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getState() != null && !addr.getState().isBlank()) {
+                        map.put("state", addr.getState());
+                    }
+                    return map;
+                },
+                addr -> {
+                    Map<String, String> map = new HashMap<>();
+                    if (addr.getCountry() != null && !addr.getCountry().isBlank()) {
+                        map.put("country", addr.getCountry());
+                    }
+                    return map;
+                });
 
-public List<User_Supplier> findNearestSupplier(Address address) {
-    if (address == null) {
+        for (Function<Address, Map<String, String>> extractor : searchLevels) {
+            Map<String, String> criteria = extractor.apply(address);
+            if (criteria.isEmpty())
+                continue;
+
+            List<User_Supplier> suppliers = supplierService.findByCriteria(criteria);
+            if (suppliers != null && !suppliers.isEmpty()) {
+                return suppliers;
+            }
+        }
+
         return supplierService.getAllSuppliers();
     }
-
-    List<Function<Address, Map<String, String>>> searchLevels = List.of(
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getStreet() != null && !addr.getStreet().isBlank()) {
-                map.put("street", addr.getStreet());
-            }
-            if (addr.getZipCode() != null && !addr.getZipCode().isBlank()) {
-                map.put("zipCode", addr.getZipCode());
-            }
-            return map;
-        },
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getCity() != null && !addr.getCity().isBlank()) {
-                map.put("city", addr.getCity());
-            }
-            return map;
-        },
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getState() != null && !addr.getState().isBlank()) {
-                map.put("state", addr.getState());
-            }
-            return map;
-        },
-        addr -> {
-            Map<String, String> map = new HashMap<>();
-            if (addr.getCountry() != null && !addr.getCountry().isBlank()) {
-                map.put("country", addr.getCountry());
-            }
-            return map;
-        }
-    );
-
-    for (Function<Address, Map<String, String>> extractor : searchLevels) {
-        Map<String, String> criteria = extractor.apply(address);
-        if (criteria.isEmpty()) continue;
-
-        List<User_Supplier> suppliers = supplierService.findByCriteria(criteria);
-        if (suppliers != null && !suppliers.isEmpty()) {
-            return suppliers;
-        }
-    }
-
-    return supplierService.getAllSuppliers();
-}
 }
