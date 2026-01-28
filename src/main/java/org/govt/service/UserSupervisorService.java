@@ -14,6 +14,7 @@ import org.govt.model.Address;
 import org.govt.model.Project;
 import org.govt.model.User_Supervisor;
 import org.govt.model.User_Supplier;
+import org.govt.repository.ProjectRepository;
 import org.govt.repository.UserSupervisorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -33,7 +34,7 @@ public class UserSupervisorService {
     @Autowired
     private JwtUtil jwt = new JwtUtil();
     @Autowired
-    ProjectService projectService;
+    ProjectRepository projectRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -152,7 +153,7 @@ public class UserSupervisorService {
     }
 
     public List<Project> getProjectsBySupervisorId(String id) {
-        return projectService.getProjectsBySupervisorId(id);
+        return projectRepository.findByAssignedSupervisorId(id);
 
     }
 
