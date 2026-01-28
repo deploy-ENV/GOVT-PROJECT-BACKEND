@@ -1,6 +1,7 @@
 package org.govt.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,9 +69,16 @@ public class ProjectService {
 
         // Update project
         project.setAssignedContractorId(contractorId);
+        if (user_Contractor.getConnected() == null) {
+            user_Contractor.setConnected(new ArrayList<>());
+        }
         user_Contractor.getConnected().add(projectId);
+
         user_ContractorService.updateUserContractor(user_Contractor);
         project.setAssignedSupervisorId(supervisorId);
+        if (user_Supervisor.getConnected() == null) {
+            user_Supervisor.setConnected(new ArrayList<>());
+        }
         user_Supervisor.getConnected().add(projectId);
         user_SupervisorService.updateUserSupervisor(user_Supervisor);
         List<String> supplierIds = supplierId;
