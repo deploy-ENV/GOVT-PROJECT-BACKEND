@@ -2,6 +2,7 @@ package org.govt.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -61,6 +62,10 @@ public class UserSupervisorService {
 
     public User_Supervisor findByUsername(String username) {
         return userSupervisorRepository.findByUsername(username);
+    }
+
+    public Optional<User_Supervisor> findById(String id) {
+        return userSupervisorRepository.findById(id);
     }
 
     public boolean authenticateSupervisor(String username, String pass) {

@@ -11,8 +11,11 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ProjectRepository extends MongoRepository<Project, String> {
   List<Project> findByProjectManagerId(String projectManagerId);
-List<Project> findByStatus(ProjectStatus status);
-List<Project> findByDepartmentId(String departmentId);
-List<Project> findByAssignedSupervisorId(String id);
-}
 
+  List<Project> findByStatus(ProjectStatus status);
+
+  List<Project> findByDepartmentId(String departmentId);
+
+  List<Project> findByAssignedSupervisorId(String supervisorId);
+
+}

@@ -2,6 +2,7 @@ package org.govt.Controller;
 
 import java.util.List;
 
+import java.util.Optional;
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Login;
 import org.govt.login_message.Register;
@@ -14,9 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -25,7 +23,7 @@ public class SupervisorAuth {
 
     @Autowired
     private UserSupervisorService userSupervisorService;
-private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private JwtUtil jwt;
 
@@ -39,28 +37,30 @@ private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User_Supervisor supervisor = userSupervisorService.findByUsername(userSupervisor.getUsername());
 
         if (supervisor != null && passwordEncoder.matches(userSupervisor.getPassword(), supervisor.getPassword())) {
-           
+
             String token = jwt.generateToken(supervisor.getUsername());
             return ResponseEntity.ok(
-                new Login<>(
-                    "LoggedIn Successfully!!!",
-                    token,
-                    supervisor
-                )
-            );
+                    new Login<>(
+                            "LoggedIn Successfully!!!",
+                            token,
+                            supervisor));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new Login<>("Invalid Credentials!!!", "", null));
+                    .body(new Login<>("Invalid Credentials!!!", "", null));
         }
     }
+
     @GetMapping("/supervisors/getProject/{id}")
-    public List<Project> getProjectsBySupervisorId(@PathVariable String id) {
-        User_Supervisor supervisor = userSupervisorService.findByUsername(id);
-        if (supervisor != null) {
-            return userSupervisorService.getProjectsBySupervisorId(id);
+    public ResponseEntity<List<Project>> getProjectsBySupervisorId(@PathVariable String id) {
+        // Check if supervisor exists
+        Optional<User_Supervisor> supervisor = userSupervisorService.findById(id);
+        if (supervisor.isEmpty()) {
+            return ResponseEntity.notFound().build(); // Return 404 if supervisor not found
         }
-        return List.of(); // Return an empty list if supervisor not found
+
+        // Fetch projects from ProjectService/Repository
+        List<Project> projects = userSupervisorService.getProjectsBySupervisorId(id);
+        return ResponseEntity.ok(projects);
     }
-    
-    
+
 }
