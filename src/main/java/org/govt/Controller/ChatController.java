@@ -20,11 +20,7 @@ public class ChatController {
     @MessageMapping("/chat.send")
     public void send(ChatMessage message, Principal principal) {
 
-        // Enforce sender identity (CRITICAL)
-        message.setSenderId(principal.getName());
-
         chatService.handleMessage(message);
     }
-   
-}
 
+}
