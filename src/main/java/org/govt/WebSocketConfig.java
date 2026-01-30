@@ -11,13 +11,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 @Configuration
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    @Autowired
-    private WebSocketJwtInterceptor webSocketJwtInterceptor;
-
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(webSocketJwtInterceptor);
-    }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
