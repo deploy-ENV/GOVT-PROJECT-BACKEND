@@ -38,7 +38,7 @@ public class SupervisorAuth {
 
         if (supervisor != null && passwordEncoder.matches(userSupervisor.getPassword(), supervisor.getPassword())) {
 
-            String token = jwt.generateToken(supervisor.getUsername());
+            String token = jwt.generateTokenWithUserId(supervisor.getUsername(), supervisor.getId());
             return ResponseEntity.ok(
                     new Login<>(
                             "LoggedIn Successfully!!!",

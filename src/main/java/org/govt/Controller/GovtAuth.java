@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins="*")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/auth")
 public class GovtAuth {
@@ -21,26 +21,23 @@ public class GovtAuth {
     private JwtUtil jwt;
 
     @PostMapping("/register/govt")
-    public Register register(@RequestBody User_govt userGovt){
+    public Register register(@RequestBody User_govt userGovt) {
         return userGovtService.registerGovt(userGovt);
     }
-   
 
     @PostMapping("/login/govt")
-public ResponseEntity<Login<User_govt>> login(@RequestBody User_govt userGovt) {
-    if (userGovtService.authenticateGovt(userGovt.getUsername(), userGovt.getPassword())) {
-        return ResponseEntity.ok(
-            new Login<>(
-                "LoggedIn Successfully!!!",
-                jwt.generateToken(userGovt.getUsername()),
-                userGovtService.findByUsername(userGovt.getUsername()) 
-            )
-        );
-    } else {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new Login<>("Invalid Credentials!!!", "", null));
+    public ResponseEntity<Login<User_govt>> login(@RequestBody User_govt userGovt) {
+        if (userGovtService.authenticateGovt(userGovt.getUsername(), userGovt.getPassword())) {
+            User_govt govtUser = userGovtService.findByUsername(userGovt.getUsername());
+            return ResponseEntity.ok(
+                    new Login<>(
+                            "LoggedIn Successfully!!!",
+                            jwt.generateTokenWithUserId(govtUser.getUsername(), govtUser.getId()),
+                            govtUser));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Login<>("Invalid Credentials!!!", "", null));
+        }
     }
-}
-
 
 }

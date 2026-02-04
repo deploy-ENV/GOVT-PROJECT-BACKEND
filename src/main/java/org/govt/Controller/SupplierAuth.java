@@ -34,21 +34,20 @@ public class SupplierAuth {
         User_Supplier supplier = userSupplierService.findByUsername(userSupplier.getUsername());
 
         if (supplier != null && passwordEncoder.matches(userSupplier.getPassword(), supplier.getPassword())) {
-          
-            String token = jwt.generateToken(supplier.getUsername());
+
+            String token = jwt.generateTokenWithUserId(supplier.getUsername(), supplier.getId());
             return ResponseEntity.ok(
-                new Login<>(
-                    "LoggedIn Successfully!!!",
-                    token,
-                    supplier
-                )
-            );
+                    new Login<>(
+                            "LoggedIn Successfully!!!",
+                            token,
+                            supplier));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new Login<>("Invalid Credentials!!!", "", null));
+                    .body(new Login<>("Invalid Credentials!!!", "", null));
         }
     }
-     @PostMapping("/{supplierId}/products")
+
+    @PostMapping("/{supplierId}/products")
     public ResponseEntity<User_Supplier> addProduct(
             @PathVariable String supplierId,
             @RequestBody Products product) {
@@ -69,12 +68,12 @@ public class SupplierAuth {
             @RequestParam boolean available) {
         return ResponseEntity.ok(userSupplierService.updateProductAvailability(supplierId, productId, available));
     }
-        @PutMapping("/{supplierId}/products")
+
+    @PutMapping("/{supplierId}/products")
     public ResponseEntity<User_Supplier> updateProduct(
             @PathVariable String supplierId,
             @RequestBody Products product) {
         return ResponseEntity.ok(userSupplierService.updateProduct(supplierId, product));
     }
-
 
 }

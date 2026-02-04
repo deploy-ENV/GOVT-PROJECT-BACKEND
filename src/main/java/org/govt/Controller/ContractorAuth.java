@@ -30,23 +30,21 @@ public class ContractorAuth {
     }
 
     @PostMapping("/login/contractor")
-public ResponseEntity<Login<User_contractor>> login(@RequestBody User_contractor user) {
-    User_contractor contractor = userContractorService.findByUsername(user.getUsername());
+    public ResponseEntity<Login<User_contractor>> login(@RequestBody User_contractor user) {
+        User_contractor contractor = userContractorService.findByUsername(user.getUsername());
 
-    if (contractor != null && passwordEncoder.matches(user.getPassword(), contractor.getPassword())) {
-        
-        String token = jwt.generateToken(contractor.getUsername());
-        return ResponseEntity.ok(
-            new Login<>(
-                "LoggedIn Successfully!!!",
-                token,
-                contractor
-            )
-        );
-    } else {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new Login<>("Invalid Credentials!!!", "", null));
+        if (contractor != null && passwordEncoder.matches(user.getPassword(), contractor.getPassword())) {
+
+            String token = jwt.generateTokenWithUserId(contractor.getUsername(), contractor.getId());
+            return ResponseEntity.ok(
+                    new Login<>(
+                            "LoggedIn Successfully!!!",
+                            token,
+                            contractor));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Login<>("Invalid Credentials!!!", "", null));
+        }
     }
-}
 
 }

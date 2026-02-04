@@ -71,7 +71,19 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
                 System.out.println("✅ Username extracted from token: " + username);
 
-                // Step 2: Find user in database
+                // Step 2: Extract user ID from token
+                String userId = jwtUtil.extractUserId(token);
+
+                if (userId == null || userId.isEmpty()) {
+                    System.err.println("❌ Failed to extract userId from JWT token");
+                    System.err.println("⚠️  This token may have been generated with the old method.");
+                    System.err.println("⚠️  Please re-login to get a new token with userId.");
+                    return message;
+                }
+
+                System.out.println("✅ User ID extracted from token: " + userId);
+
+                // Step 3: Find user in database for validation
                 UserDetails userDetails = findUserByUsername(username);
 
                 if (userDetails == null) {
@@ -81,7 +93,7 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
                 System.out.println("✅ User found in database: " + userDetails.getUsername());
 
-                // Step 3: Validate token
+                // Step 4: Validate token
                 boolean isValid = jwtUtil.validateToken(token, userDetails);
 
                 if (!isValid) {
@@ -91,17 +103,21 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
                 System.out.println("✅ JWT token validated successfully for user: " + username);
 
-                // Step 4: Create authentication and set user
+                // Step 5: Create custom principal with USER ID (not username)
+                UserIdPrincipal principal = new UserIdPrincipal(userId, username);
+
+                // Create authentication with custom principal
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails,
+                        principal, // Use custom principal
                         null,
                         userDetails.getAuthorities());
 
                 accessor.setUser(authentication);
 
                 System.out
-                        .println("✅✅✅ WebSocket authentication SUCCESS! User ID stored: " + userDetails.getUsername());
-                System.out.println("    - Principal name: " + authentication.getName());
+                        .println("✅✅✅ WebSocket authentication SUCCESS! User ID stored: " + userId);
+                System.out.println("    - Principal name (USER ID): " + authentication.getName());
+                System.out.println("    - Username: " + username);
                 System.out.println("    - Authorities: " + authentication.getAuthorities());
 
             } catch (Exception e) {

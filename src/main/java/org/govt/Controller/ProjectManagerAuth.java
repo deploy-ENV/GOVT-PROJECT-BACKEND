@@ -12,14 +12,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins="*")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/auth")
 public class ProjectManagerAuth {
 
     @Autowired
     private UserProjectManagerService userProjectManagerService;
-private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private JwtUtil jwt;
 
@@ -33,17 +33,15 @@ private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User_ProjectManager manager = userProjectManagerService.findByUsername(userProjectManager.getUsername());
 
         if (manager != null && passwordEncoder.matches(userProjectManager.getPassword(), manager.getPassword())) {
-            String token = jwt.generateToken(manager.getUsername());
+            String token = jwt.generateTokenWithUserId(manager.getUsername(), manager.getId());
             return ResponseEntity.ok(
-                new Login<>(
-                    "LoggedIn Successfully!!!",
-                    token,
-                    manager
-                )
-            );
+                    new Login<>(
+                            "LoggedIn Successfully!!!",
+                            token,
+                            manager));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new Login<>("Invalid Credentials!!!", "", null));
+                    .body(new Login<>("Invalid Credentials!!!", "", null));
         }
     }
 }
