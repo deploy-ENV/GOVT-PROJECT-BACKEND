@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat WebSocket Test - Government Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --bg-dark: #0f0f23;
+        --bg-card: #1a1a2e;
+        --bg-input: #16213e;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0b8;
+        --sender-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --receiver-bg: #2a2a3e;
+        --border-color: #2d2d44;
+        --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.4);
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+      }
+
+      /* Animated Background */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+          radial-gradient(
+            circle at 20% 50%,
+            rgba(102, 126, 234, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(118, 75, 162, 0.1) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: var(--bg-card);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow);
+      }
+
+      h1 {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 400;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 20px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .control-panel {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+      }
+
+      .control-section {
+        margin-bottom: 24px;
+      }
+
+      .control-section:last-child {
+        margin-bottom: 0;
+      }
+
+      .control-section h3 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+      }
+
+      .input-group {
+        margin-bottom: 16px;
+      }
+
+      .input-group:last-child {
+        margin-bottom: 0;
+      }
+
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-family: "Inter", sans-serif;
+        transition: all 0.3s ease;
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus,
+      input[type="number"]:focus,
+      select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      button {
+        width: 100%;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        font-family: "Inter", sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-danger {
+        background: var(--secondary-gradient);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+      }
+
+      .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: var(--bg-input);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ef4444;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .status-dot.connected {
+        background: #10b981;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .chat-container {
+        background: var(--bg-card);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 240px);
+        min-height: 500px;
+      }
+
+      .chat-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-input);
+        border-radius: 16px 16px 0 0;
+      }
+
+      .chat-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .chat-info {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .messages-container::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .messages-container::-webkit-scrollbar-track {
+        background: var(--bg-input);
+        border-radius: 4px;
+      }
+
+      .messages-container::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+      }
+
+      .messages-container::-webkit-scrollbar-thumb:hover {
+        background: #3d3d5c;
+      }
+
+      .message {
+        display: flex;
+        gap: 12px;
+        max-width: 70%;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .message.sender {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+      }
+
+      .message.receiver {
+        align-self: flex-start;
+      }
+
+      .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+      }
+
+      .message.sender .message-avatar {
+        background: var(--sender-bg);
+        color: white;
+      }
+
+      .message.receiver .message-avatar {
+        background: var(--success-gradient);
+        color: white;
+      }
+
+      .message-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .message-bubble {
+        padding: 12px 16px;
+        border-radius: 12px;
+        word-wrap: break-word;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .message.sender .message-bubble {
+        background: var(--sender-bg);
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+
+      .message.receiver .message-bubble {
+        background: var(--receiver-bg);
+        color: var(--text-primary);
+        border-bottom-left-radius: 4px;
+      }
+
+      .message-meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 0 4px;
+      }
+
+      .message.sender .message-meta {
+        flex-direction: row-reverse;
+      }
+
+      .message-time {
+        font-weight: 500;
+      }
+
+      .message-sender {
+        font-weight: 600;
+      }
+
+      .message-input-container {
+        padding: 20px 24px;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-input);
+        border-radius: 0 0 16px 16px;
+      }
+
+      .message-input-wrapper {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+      }
+
+      .message-input-wrapper textarea {
+        flex: 1;
+        padding: 12px 16px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-family: "Inter", sans-serif;
+        resize: none;
+        min-height: 44px;
+        max-height: 120px;
+        transition: all 0.3s ease;
+      }
+
+      .message-input-wrapper textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .message-input-wrapper button {
+        width: auto;
+        padding: 12px 24px;
+        white-space: nowrap;
+      }
+
+      .system-message {
+        align-self: center;
+        padding: 8px 16px;
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 16px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-align: center;
+        max-width: 80%;
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-secondary);
+        text-align: center;
+        padding: 40px;
+      }
+
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 16px;
+        opacity: 0.3;
+      }
+
+      .empty-state-text {
+        font-size: 1.125rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+
+      .empty-state-subtext {
+        font-size: 0.875rem;
+        opacity: 0.7;
+      }
+
+      @media (max-width: 968px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+
+        .control-panel {
+          position: static;
+        }
+
+        .message {
+          max-width: 85%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🔒 Chat WebSocket Test</h1>
+        <p class="subtitle">
+          Government Project - Secure Communication Testing
+        </p>
+      </header>
+
+      <div class="main-content">
+        <!-- Control Panel -->
+        <div class="control-panel">
+          <div class="control-section">
+            <h3>Connection</h3>
+            <div class="status-indicator">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusText">Disconnected</span>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <h3>Authentication</h3>
+            <div class="input-group">
+              <label for="userType">User Type</label>
+              <select id="userType">
+                <option value="contractor">Contractor</option>
+                <option value="projectmanager">Project Manager</option>
+                <option value="supervisor">Supervisor</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" placeholder="Enter username" />
+            </div>
+            <div class="input-group">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter password"
+              />
+            </div>
+            <button class="btn-primary" id="loginBtn" onclick="login()">
+              Login & Connect
+            </button>
+          </div>
+
+          <div class="control-section">
+            <h3>Chat Settings</h3>
+            <div class="input-group">
+              <label for="projectId">Project ID</label>
+              <input
+                type="number"
+                id="projectId"
+                placeholder="Enter project ID"
+                value="1"
+              />
+            </div>
+            <div class="input-group">
+              <label for="receiverId">Receiver User ID</label>
+              <input
+                type="number"
+                id="receiverId"
+                placeholder="Enter receiver user ID"
+              />
+            </div>
+          </div>
+
+          <div class="control-section">
+            <button
+              class="btn-danger"
+              id="disconnectBtn"
+              onclick="disconnect()"
+              disabled
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+          <div class="chat-header">
+            <h2>Chat Messages</h2>
+            <p class="chat-info" id="chatInfo">Connect to start chatting</p>
+          </div>
+          <div class="messages-container" id="messagesContainer">
+            <div class="empty-state">
+              <div class="empty-state-icon">💬</div>
+              <div class="empty-state-text">No messages yet</div>
+              <div class="empty-state-subtext">
+                Login and connect to start the conversation
+              </div>
+            </div>
+          </div>
+          <div class="message-input-container">
+            <div class="message-input-wrapper">
+              <textarea
+                id="messageInput"
+                placeholder="Type your message here..."
+                disabled
+                rows="1"
+                onkeypress="handleKeyPress(event)"
+              ></textarea>
+              <button
+                class="btn-primary"
+                id="sendBtn"
+                onclick="sendMessage()"
+                disabled
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let stompClient = null;
+      let jwtToken = null;
+      let currentUserId = null;
+      let currentUsername = null;
+
+      // Configuration
+      const API_BASE_URL = "http://localhost:8080";
+      const WS_URL = "http://localhost:8080/ws";
+
+      // Auto-resize textarea
+      document
+        .getElementById("messageInput")
+        .addEventListener("input", function () {
+          this.style.height = "auto";
+          this.style.height = this.scrollHeight + "px";
+        });
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      }
+
+      async function login() {
+        const userType = document.getElementById("userType").value;
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+          addSystemMessage("Please enter username and password");
+          return;
+        }
+
+        try {
+          const loginEndpoint = `${API_BASE_URL}/${userType}/login`;
+
+          addSystemMessage(`Attempting login as ${userType}...`);
+
+          const response = await fetch(loginEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Login failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+          jwtToken = data.jwt;
+          currentUserId = data.userId;
+          currentUsername = username;
+
+          addSystemMessage(`✓ Login successful! User ID: ${currentUserId}`);
+
+          // Connect to WebSocket
+          connectWebSocket();
+        } catch (error) {
+          addSystemMessage(`✗ Login failed: ${error.message}`);
+          console.error("Login error:", error);
+        }
+      }
+
+      function connectWebSocket() {
+        if (!jwtToken) {
+          addSystemMessage("No JWT token available. Please login first.");
+          return;
+        }
+
+        addSystemMessage("Connecting to WebSocket...");
+
+        const socket = new SockJS(WS_URL);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+          { Authorization: `Bearer ${jwtToken}` },
+          onConnected,
+          onError,
+        );
+      }
+
+      function onConnected() {
+        updateConnectionStatus(true);
+        addSystemMessage("✓ WebSocket connected successfully!");
+
+        const projectId = document.getElementById("projectId").value;
+
+        // Subscribe to project chat
+        stompClient.subscribe(`/topic/project/${projectId}`, onMessageReceived);
+
+        // Subscribe to private messages
+        stompClient.subscribe(`/user/queue/private`, onMessageReceived);
+
+        addSystemMessage(`Subscribed to project ${projectId} chat`);
+
+        // Enable message input
+        document.getElementById("messageInput").disabled = false;
+        document.getElementById("sendBtn").disabled = false;
+        document.getElementById("loginBtn").disabled = true;
+        document.getElementById("disconnectBtn").disabled = false;
+
+        updateChatInfo();
+      }
+
+      function onError(error) {
+        updateConnectionStatus(false);
+        addSystemMessage(`✗ Connection error: ${error}`);
+        console.error("WebSocket error:", error);
+      }
+
+      function onMessageReceived(payload) {
+        const message = JSON.parse(payload.body);
+        console.log("Message received:", message);
+
+        const isSender = message.senderId === currentUserId;
+        addChatMessage(message, isSender);
+      }
+
+      function sendMessage() {
+        const messageInput = document.getElementById("messageInput");
+        const content = messageInput.value.trim();
+        const projectId = document.getElementById("projectId").value;
+        const receiverId = document.getElementById("receiverId").value;
+
+        if (!content) {
+          return;
+        }
+
+        if (!stompClient || !stompClient.connected) {
+          addSystemMessage("Not connected to WebSocket");
+          return;
+        }
+
+        const chatMessage = {
+          senderId: currentUserId,
+          receiverId: receiverId ? parseInt(receiverId) : null,
+          projectId: parseInt(projectId),
+          message: content,
+          timestamp: new Date().toISOString(),
+        };
+
+        console.log("Sending message:", chatMessage);
+
+        stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+
+        // Clear input
+        messageInput.value = "";
+        messageInput.style.height = "auto";
+      }
+
+      function addChatMessage(message, isSender) {
+        const messagesContainer = document.getElementById("messagesContainer");
+
+        // Remove empty state if present
+        const emptyState = messagesContainer.querySelector(".empty-state");
+        if (emptyState) {
+          emptyState.remove();
+        }
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${isSender ? "sender" : "receiver"}`;
+
+        const senderName = isSender ? "You" : `User ${message.senderId}`;
+        const avatarInitial = isSender
+          ? currentUsername.charAt(0).toUpperCase()
+          : message.senderId.toString();
+
+        const timestamp = new Date(message.timestamp).toLocaleTimeString(
+          "en-US",
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+          },
+        );
+
+        messageDiv.innerHTML = `
+                <div class="message-avatar">${avatarInitial}</div>
+                <div class="message-content">
+                    <div class="message-bubble">${escapeHtml(message.message)}</div>
+                    <div class="message-meta">
+                        <span class="message-sender">${senderName}</span>
+                        <span class="message-time">${timestamp}</span>
+                    </div>
+                </div>
+            `;
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      function addSystemMessage(text) {
+        const messagesContainer = document.getElementById("messagesContainer");
+
+        // Remove empty state if present
+        const emptyState = messagesContainer.querySelector(".empty-state");
+        if (emptyState) {
+          emptyState.remove();
+        }
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "system-message";
+        messageDiv.textContent = text;
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      function disconnect() {
+        if (stompClient) {
+          stompClient.disconnect(() => {
+            updateConnectionStatus(false);
+            addSystemMessage("Disconnected from WebSocket");
+          });
+        }
+
+        jwtToken = null;
+        currentUserId = null;
+        currentUsername = null;
+
+        document.getElementById("messageInput").disabled = true;
+        document.getElementById("sendBtn").disabled = true;
+        document.getElementById("loginBtn").disabled = false;
+        document.getElementById("disconnectBtn").disabled = true;
+
+        updateChatInfo();
+      }
+
+      function updateConnectionStatus(connected) {
+        const statusDot = document.getElementById("statusDot");
+        const statusText = document.getElementById("statusText");
+
+        if (connected) {
+          statusDot.classList.add("connected");
+          statusText.textContent = "Connected";
+        } else {
+          statusDot.classList.remove("connected");
+          statusText.textContent = "Disconnected";
+        }
+      }
+
+      function updateChatInfo() {
+        const chatInfo = document.getElementById("chatInfo");
+        const projectId = document.getElementById("projectId").value;
+
+        if (currentUserId) {
+          chatInfo.textContent = `Project ${projectId} • Logged in as User ${currentUserId} (${currentUsername})`;
+        } else {
+          chatInfo.textContent = "Connect to start chatting";
+        }
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Update chat info when project ID changes
+      document
+        .getElementById("projectId")
+        .addEventListener("change", updateChatInfo);
+    </script>
+
+    <!-- SockJS and STOMP libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  </body>
+</html>

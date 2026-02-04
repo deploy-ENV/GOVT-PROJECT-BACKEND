@@ -38,8 +38,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
@@ -55,22 +55,31 @@ public class JwtFilter extends OncePerRequestFilter {
             UserDetails userDetails = null;
 
             // Try to find the user in each repository
-            if (userSupplier.findByUsername(username)!=null) {
+            if (userSupplier.findByUsername(username) != null) {
                 userDetails = userSupplier.findByUsername(username);
-            } else if (userContractor.findByUsername(username)!=null) {
+            } else if (userContractor.findByUsername(username) != null) {
                 userDetails = userContractor.findByUsername(username);
-            } else if (userProject.findByUsername(username)!=null) {
+            } else if (userProject.findByUsername(username) != null) {
                 userDetails = userProject.findByUsername(username);
-            } else if (usergovt.findByUsername(username)!=null) {
+            } else if (usergovt.findByUsername(username) != null) {
                 userDetails = usergovt.findByUsername(username);
-            } else if (userSupervisor.findByUsername(username)!=null) {
+            } else if (userSupervisor.findByUsername(username) != null) {
                 userDetails = userSupervisor.findByUsername(username);
             }
 
             if (userDetails != null && jwtUtil.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
+                // Extract user ID from token
+                String userId = jwtUtil.extractUserId(token);
+
+                // If userId is in token, use UserIdPrincipal to make it available via
+                // principal.getName()
+                Object principal = userDetails;
+                if (userId != null && !userId.isEmpty()) {
+                    principal = new UserIdPrincipal(userId, username);
+                }
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        principal, null, userDetails.getAuthorities());
 
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
@@ -82,4 +91,3 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-
