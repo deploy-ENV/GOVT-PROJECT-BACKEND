@@ -20,30 +20,59 @@ public class ChatHistoryController {
 
     @Autowired
     private ChatRepository chatRepository;
-      @Autowired
+    @Autowired
     private ChatService chatService;
 
     @GetMapping("/{otherUserId}")
-    public List<ChatMessage> getHistory(
+    public ResponseEntity<?> getHistory(
             @PathVariable String otherUserId,
             Principal principal) {
 
-        return chatRepository.findChatBetweenUsers(
-                principal.getName(),
-                otherUserId
-        );
+        try {
+            if (principal == null) {
+                System.err.println("ERROR: No authenticated user for chat history request");
+                return ResponseEntity.status(401).body("Unauthorized");
+            }
+
+            String currentUserId = principal.getName();
+            System.out.println("Fetching chat history between " + currentUserId + " and " + otherUserId);
+
+            List<ChatMessage> messages = chatRepository.findChatBetweenUsers(
+                    currentUserId,
+                    otherUserId);
+
+            System.out.println("✅ Found " + messages.size() + " messages");
+            return ResponseEntity.ok(messages);
+
+        } catch (Exception e) {
+            System.err.println("❌ ERROR fetching chat history: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error fetching chat history");
+        }
     }
-     @PutMapping("/read/{senderId}")
+
+    @PutMapping("/read/{senderId}")
     public ResponseEntity<String> markAsRead(
             @PathVariable String senderId,
             Principal principal) {
 
-        String receiverId = principal.getName();
+        try {
+            if (principal == null) {
+                System.err.println("ERROR: No authenticated user for mark as read request");
+                return ResponseEntity.status(401).body("Unauthorized");
+            }
 
-       
-        chatService.markMessagesAsRead(senderId, receiverId);
+            String receiverId = principal.getName();
+            System.out.println("Marking messages from " + senderId + " to " + receiverId + " as READ");
 
-        return ResponseEntity.ok("Messages marked as READ");
+            chatService.markMessagesAsRead(senderId, receiverId);
+
+            return ResponseEntity.ok("Messages marked as READ");
+
+        } catch (Exception e) {
+            System.err.println("❌ ERROR marking messages as read: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error marking messages as read");
+        }
     }
 }
-

@@ -41,3 +41,19 @@ build/
 ### AWS
 terraform
 aws_resources
+
+### Testing Files (do not commit to production)
+test-websocket.html
+test-login.ps1
+check-users.ps1
+check-users.bat
+restart-backend.ps1
+start-webserver.ps1
+diagnose-websocket.ps1
+start-test.ps1
+TESTING_GUIDE.md
+TESTING_README.md
+QUICK_TEST_REFERENCE.md
+WEBSOCKET_FIX.md
+QUICK_FIX.md
+cleanup-for-production.ps1

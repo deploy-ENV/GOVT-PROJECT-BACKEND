@@ -44,10 +44,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
+        // Production-ready CORS configuration
+        // Add your production frontend URLs here
         config.setAllowedOriginPatterns(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "https://gov-ashen-iota.vercel.app"));
+                "https://gov-ashen-iota.vercel.app", // Production frontend
+                "http://localhost:3000", // Local development (React)
+                "http://localhost:5173", // Local development (Vite)
+                "http://localhost:8000" // Local testing
+        ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
