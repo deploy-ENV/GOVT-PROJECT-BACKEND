@@ -1,8 +1,10 @@
 package org.govt.Controller;
 
+import java.util.List;
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Login;
 import org.govt.login_message.Register;
+import org.govt.model.Project;
 import org.govt.model.User_contractor;
 import org.govt.service.UserContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,11 @@ public class ContractorAuth {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new Login<>("Invalid Credentials!!!", "", null));
         }
+    }
+
+    @GetMapping("/contractor/getProject/{id}")
+    public ResponseEntity<List<Project>> getProject(@PathVariable String id) {
+        return ResponseEntity.ok(userContractorService.getProject(id));
     }
 
 }

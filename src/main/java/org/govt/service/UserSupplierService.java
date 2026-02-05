@@ -17,7 +17,6 @@ import org.govt.repository.UserSupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.security.access.method.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,38 +29,40 @@ public class UserSupplierService {
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
-    private  PasswordEncoder password;
+    private PasswordEncoder password;
     @Autowired
     private ProjectRepository projectRepo;
     @Autowired
     private UserSupplierRepository supplierRepo;
     @Autowired
-    JwtUtil jwt =new JwtUtil();
+    JwtUtil jwt = new JwtUtil();
 
     public List<User_Supplier> autoFetchSuppliers(String projectId) {
         Project project = projectRepo.findById(projectId).orElseThrow();
         String zone = project.getLocation().getZipCode();
         return supplierRepo.findByAddress(project.getLocation());
-        
+
     }
 
-    public Register registerSupplier(User_Supplier userSupplier){
-        if(findByUsername(userSupplier.getUsername())!=null){
-            return new Register("User Already Exists!!",jwt.generateToken(userSupplier.getUsername()),findByUsername(userSupplier.getUsername()));
+    public Register registerSupplier(User_Supplier userSupplier) {
+        if (findByUsername(userSupplier.getUsername()) != null) {
+            return new Register("User Already Exists!!", jwt.generateToken(userSupplier.getUsername()),
+                    findByUsername(userSupplier.getUsername()));
         }
         userSupplier.setPassword(password.encode(userSupplier.getPassword()));
         userSupplierRepository.save(userSupplier);
-        return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()),findByUsername(userSupplier.getUsername()));
+        return new Register("User Registered!!!", jwt.generateToken(userSupplier.getUsername()),
+                findByUsername(userSupplier.getUsername()));
     }
 
     public User_Supplier findByUsername(String username) {
         return userSupplierRepository.findByUsername(username);
     }
 
-    public boolean authenticateSupplier(String username,String password1){
-        BCryptPasswordEncoder pass=new BCryptPasswordEncoder();
-        User_Supplier supplier= userSupplierRepository.findByUsername(username);
-        return supplier!=null && password.matches(password1,supplier.getPassword());
+    public boolean authenticateSupplier(String username, String password1) {
+        BCryptPasswordEncoder pass = new BCryptPasswordEncoder();
+        User_Supplier supplier = userSupplierRepository.findByUsername(username);
+        return supplier != null && password.matches(password1, supplier.getPassword());
     }
 
     public List<User_Supplier> findByStreetAndZipCode(String street, String zipCode) {
@@ -83,6 +84,7 @@ public class UserSupplierService {
     public List<User_Supplier> getAllSuppliers() {
         return userSupplierRepository.findAll();
     }
+
     public List<User_Supplier> findByCriteria(Map<String, String> criteria) {
         Query query = new Query();
 
@@ -94,7 +96,6 @@ public class UserSupplierService {
 
         return mongoTemplate.find(query, User_Supplier.class);
     }
-
 
     // Add product to supplier catalog
     public User_Supplier addProduct(String supplierId, Products product) {
@@ -117,6 +118,7 @@ public class UserSupplierService {
         supplier.getCatalogProducts().removeIf(p -> p.getId().equals(productId));
         return userSupplierRepository.save(supplier);
     }
+
     // Change product availability
     public User_Supplier updateProductAvailability(String supplierId, String productId, boolean available) {
         User_Supplier supplier = userSupplierRepository.findById(supplierId)
@@ -136,14 +138,17 @@ public class UserSupplierService {
         User_Supplier supplier = userSupplierRepository.findById(supplierId)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
 
-        supplier.getCatalogProducts().replaceAll(p ->
-                p.getId().equals(updatedProduct.getId()) ? updatedProduct : p
-        );
+        supplier.getCatalogProducts().replaceAll(p -> p.getId().equals(updatedProduct.getId()) ? updatedProduct : p);
 
         return userSupplierRepository.save(supplier);
     }
 
+    public User_Supplier getProject(String id) {
+        return userSupplierRepository.findById(id).orElseThrow(() -> new RuntimeException("Supplier not found"));
+    }
 
-
+    public List<Project> getProjectsBySupplier(String supplierId) {
+        return projectRepo.findAllByAssignedSupplierIdsContaining(supplierId);
+    }
 
 }

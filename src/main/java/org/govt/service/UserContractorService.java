@@ -1,8 +1,11 @@
 package org.govt.service;
 
+import java.util.List;
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Register;
+import org.govt.model.Project;
 import org.govt.model.User_contractor;
+import org.govt.repository.ProjectRepository;
 import org.govt.repository.UserContractorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +17,8 @@ public class UserContractorService {
 
     @Autowired
     private UserContractorRepository userRepository;
+    @Autowired
+    private ProjectRepository projectRepo;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private JwtUtil jwt;
@@ -46,4 +51,9 @@ public class UserContractorService {
     public void updateUserContractor(User_contractor userContractor) {
         userRepository.save(userContractor);
     }
+
+    public List<Project> getProject(String id) {
+        return projectRepo.findByAssignedContractorId(id);
+    }
+
 }

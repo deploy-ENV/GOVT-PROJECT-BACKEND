@@ -1,9 +1,12 @@
 package org.govt.Controller;
 
+import java.util.List;
+
 import org.govt.Authentication.JwtUtil;
 import org.govt.login_message.Login;
 import org.govt.login_message.Register;
 import org.govt.model.Products;
+import org.govt.model.Project;
 import org.govt.model.User_Supplier;
 import org.govt.service.UserSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +77,11 @@ public class SupplierAuth {
             @PathVariable String supplierId,
             @RequestBody Products product) {
         return ResponseEntity.ok(userSupplierService.updateProduct(supplierId, product));
+    }
+
+    @GetMapping("/supplier/getProject/{id}")
+    public ResponseEntity<List<Project>> getProject(@PathVariable String id) {
+        return ResponseEntity.ok(userSupplierService.getProjectsBySupplier(id));
     }
 
 }

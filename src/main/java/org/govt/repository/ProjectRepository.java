@@ -18,4 +18,8 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
 
   List<Project> findByAssignedSupervisorId(String supervisorId);
 
+  List<Project> findAllByAssignedSupplierIdsContaining(String supplierId);
+
+  List<Project> findByAssignedContractorId(String contractorId);
+
 }
